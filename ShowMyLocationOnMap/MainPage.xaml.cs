@@ -21,45 +21,72 @@ namespace ShowMyLocationOnMap
 {
     public partial class MainPage : PhoneApplicationPage
     {
-       // Geolocator myGeolocator = null;
+       Geolocator myGeolocator = null;
 
         // Constructor
         public MainPage()
         {
             InitializeComponent();
             ShowMyLocationOnTheMap();
-            GetDirection();
-            //TrackLocation();
-           
-
-            // Sample code to localize the ApplicationBar
-            //BuildLocalizedApplicationBar();
+                      
         }
 
         private void TrackLocation()
         {
-            //myGeolocator = new Geolocator();
-            //myGeolocator.DesiredAccuracy = PositionAccuracy.High;
-            //myGeolocator.MovementThreshold = 100; // The units are meters. 
+            myGeolocator = new Geolocator();
+            myGeolocator.DesiredAccuracy = PositionAccuracy.High;
+            myGeolocator.MovementThreshold = 100; // The units are meters. 
             //myGeolocator.StatusChanged += geolocator_StatusChanged;
             //myGeolocator.PositionChanged += geolocator_PositionChanged;
         }
 
-        private async void GetDirection()
+        void geolocator_StatusChanged(Geolocator sender, StatusChangedEventArgs args)
         {
-            // Get Directions 
-            MapsDirectionsTask mapsDirectionsTask = new MapsDirectionsTask();
-            // You can specify a label and a geocoordinate for the end point. //
-            // GeoCoordinate spaceNeedleLocation = new GeoCoordinate(47.6204,-122.3493); 
-            // LabeledMapLocation s
-            // paceNdleLML = new LabeledMapLocation("Space Needle",  spaceNeedleLocation);  
+            string status = "";
 
-            // If you set the geocoordinate parameter to null, the label parameter // is used as a search term. 
-            LabeledMapLocation spaceNdleLML = new LabeledMapLocation("Space Needle", null);
-            // If mapsDirectionsTask.Start is not set, the user's current location // is used as start point. 
-            mapsDirectionsTask.End = spaceNdleLML;
-            mapsDirectionsTask.Show(); 
+            switch (args.Status)
+            {
+                case PositionStatus.Disabled:
+                    // the application does not have the right capability or the location master switch is off
+                    status = "location is disabled in phone settings";
+                    break;
+                case PositionStatus.Initializing:
+                    // the geolocator started the tracking operation
+                    status = "initializing";
+                    break;
+                case PositionStatus.NoData:
+                    // the location service was not able to acquire the location
+                    status = "no data";
+                    break;
+                case PositionStatus.Ready:
+                    // the location service is generating geopositions as specified by the tracking parameters
+                    status = "ready";
+                    break;
+                case PositionStatus.NotAvailable:
+                    status = "not available";
+                    // not used in WindowsPhone, Windows desktop uses this value to signal that there is no hardware capable to acquire location information
+                    break;
+                case PositionStatus.NotInitialized:
+                    // the initial state of the geolocator, once the tracking operation is stopped by the user the geolocator moves back to this state
+
+                    break;
+            }
+            Dispatcher.BeginInvoke(() =>
+            {
+                //StatusTextBlock.Text = status;
+            });
+
         }
+
+        void geolocator_PositionChanged(Geolocator sender, PositionChangedEventArgs args) 
+        { 
+            Dispatcher.BeginInvoke(() =>
+            { 
+               // LatitudeTextBlock.Text = args.Position.Coordinate.Latitude.ToString("0.00");
+               // LongitudeTextBlock.Text = args.Position.Coordinate.Longitude.ToString("0.00");
+            });
+        }
+
 
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
@@ -106,7 +133,7 @@ namespace ShowMyLocationOnMap
         private async void ShowMyLocationOnTheMap()
         {
             // Get my current location.
-            Geolocator myGeolocator = new Geolocator();
+            myGeolocator = new Geolocator();
             Geoposition myGeoposition = await myGeolocator.GetGeopositionAsync();
             Geocoordinate myGeocoordinate = myGeoposition.Coordinate;
             GeoCoordinate myGeoCoordinate = 
@@ -135,6 +162,18 @@ namespace ShowMyLocationOnMap
 
             // Add the MapLayer to the Map.
             mapWithMyLocation.Layers.Add(myLocationLayer);
+        }
+
+        private void Go_Click(object sender, RoutedEventArgs e)
+        {
+            string endLocation = End.Text;
+            MapsDirectionsTask mapsDirectionsTask = new MapsDirectionsTask();
+
+            // If you set the geocoordinate parameter to null, the label parameter is used as a search term. 
+            LabeledMapLocation endLocationLML = new LabeledMapLocation(endLocation, null);
+            // If mapsDirectionsTask.Start is not set, the user's current location // is used as start point. 
+            mapsDirectionsTask.End = endLocationLML;
+            mapsDirectionsTask.Show(); 
         }
     }
 }

@@ -14,6 +14,9 @@
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait" Orientation="Portrait"
     shell:SystemTray.IsVisible="True">
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar/>
+    </phone:PhoneApplicationPage.ApplicationBar>
 
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
@@ -43,16 +46,18 @@
 
         <!--TitlePanel contains the name of the application and page title-->
         <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-            <TextBlock Text="SHOW MY LOCATION ON MAP" Style="{StaticResource PhoneTextNormalStyle}" Margin="12,0"/>
-            <TextBlock Text="my location" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
+            <TextBlock Text="DELIVERY JOURNAL" Style="{StaticResource PhoneTextNormalStyle}" Margin="12,0"/>
+            <TextBlock Text="Delivery Route" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}" Height="100"/>
         </StackPanel>
 
         <!--ContentPanel - place additional content here-->
-        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
+        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="18,91,12,0">
 
-            <maps:Map x:Name="mapWithMyLocation"/>
+            <maps:Map x:Name="mapWithMyLocation" Margin="-15,-43,-8,-1"/>
 
         </Grid>
+        <TextBox x:Name="End" HorizontalAlignment="Left" Height="73" Margin="6,138,0,0" TextWrapping="Wrap" Text="Destination" VerticalAlignment="Top" Width="310" Grid.RowSpan="2"/>
+        <Button x:Name="Go" Content="Get Route" HorizontalAlignment="Left" Margin="307,141,0,0" VerticalAlignment="Top" Width="154" Click="Go_Click" Grid.RowSpan="2"/>
 
         <!--Uncomment to see an alignment grid to help ensure your controls are
             aligned on common boundaries.  The image has a top margin of -32px to
