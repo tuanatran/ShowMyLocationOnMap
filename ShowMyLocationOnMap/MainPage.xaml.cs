@@ -14,21 +14,51 @@ using Windows.Devices.Geolocation; //Provides the Geocoordinate class.
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Threading.Tasks;
-using Windows.Devices.Geolocation;
 using System.IO.IsolatedStorage;
+using Microsoft.Phone.Tasks;
 
 namespace ShowMyLocationOnMap
 {
     public partial class MainPage : PhoneApplicationPage
     {
+       // Geolocator myGeolocator = null;
+
         // Constructor
         public MainPage()
         {
             InitializeComponent();
             ShowMyLocationOnTheMap();
+            GetDirection();
+            //TrackLocation();
+           
 
             // Sample code to localize the ApplicationBar
             //BuildLocalizedApplicationBar();
+        }
+
+        private void TrackLocation()
+        {
+            //myGeolocator = new Geolocator();
+            //myGeolocator.DesiredAccuracy = PositionAccuracy.High;
+            //myGeolocator.MovementThreshold = 100; // The units are meters. 
+            //myGeolocator.StatusChanged += geolocator_StatusChanged;
+            //myGeolocator.PositionChanged += geolocator_PositionChanged;
+        }
+
+        private async void GetDirection()
+        {
+            // Get Directions 
+            MapsDirectionsTask mapsDirectionsTask = new MapsDirectionsTask();
+            // You can specify a label and a geocoordinate for the end point. //
+            // GeoCoordinate spaceNeedleLocation = new GeoCoordinate(47.6204,-122.3493); 
+            // LabeledMapLocation s
+            // paceNdleLML = new LabeledMapLocation("Space Needle",  spaceNeedleLocation);  
+
+            // If you set the geocoordinate parameter to null, the label parameter // is used as a search term. 
+            LabeledMapLocation spaceNdleLML = new LabeledMapLocation("Space Needle", null);
+            // If mapsDirectionsTask.Start is not set, the user's current location // is used as start point. 
+            mapsDirectionsTask.End = spaceNdleLML;
+            mapsDirectionsTask.Show(); 
         }
 
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
