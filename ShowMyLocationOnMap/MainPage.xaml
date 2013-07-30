@@ -19,7 +19,7 @@
     </phone:PhoneApplicationPage.ApplicationBar>
 
     <!--LayoutRoot is the root grid where all page content is placed-->
-    <Grid x:Name="LayoutRoot" Background="Transparent">
+    <Grid x:Name="LayoutRoot" Background="Transparent" Margin="0,0,0,96">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -47,17 +47,21 @@
         <!--TitlePanel contains the name of the application and page title-->
         <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
             <TextBlock Text="DELIVERY JOURNAL" Style="{StaticResource PhoneTextNormalStyle}" Margin="12,0"/>
-            <TextBlock Text="Delivery Route" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}" Height="100"/>
+            <TextBlock Text="Delivery Route" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}" Height="60" FontSize="36"/>
         </StackPanel>
 
         <!--ContentPanel - place additional content here-->
-        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="18,91,12,0">
+        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="0,17,2,64">
 
-            <maps:Map x:Name="mapWithMyLocation" Margin="-15,-43,-8,-1"/>
+            <maps:Map x:Name="mapWithMyLocation" Margin="-15,3,-8,-41"/>
 
         </Grid>
-        <TextBox x:Name="End" HorizontalAlignment="Left" Height="73" Margin="6,138,0,0" TextWrapping="Wrap" Text="Destination" VerticalAlignment="Top" Width="310" Grid.RowSpan="2"/>
-        <Button x:Name="Go" Content="Get Route" HorizontalAlignment="Left" Margin="307,141,0,0" VerticalAlignment="Top" Width="154" Click="Go_Click" Grid.RowSpan="2"/>
+        <TextBox x:Name="End" HorizontalAlignment="Left" Height="67" Margin="-8,82,0,0" TextWrapping="Wrap" Text="Des" VerticalAlignment="Top" Width="352" FontSize="22" Grid.RowSpan="2"/>
+        <Button x:Name="Go" Content="Get Route" HorizontalAlignment="Left" Margin="325,83,0,0" VerticalAlignment="Top" Width="150" Click="Go_Click" Height="66" FontSize="22" Grid.RowSpan="2"/>
+        <Button x:Name="TrackLocationButton" Content="track location" HorizontalAlignment="Left" Margin="-12,444,-12,-41" VerticalAlignment="Top" Width="504" Grid.Row="1" Click="TrackLocationButton_Click" Height="72"/>
+        <TextBlock x:Name="LatitudeTextBlock" HorizontalAlignment="Left" Margin="4,505,0,-64" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="214" Height="34"/>
+        <TextBlock x:Name="LongitudeTextBlock" HorizontalAlignment="Left" Margin="234,505,0,-62" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="228" Height="32"/>
+        <TextBlock x:Name="StatusTextBlock" HorizontalAlignment="Left" Margin="6,533,0,-92" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="218" Height="34"/>
 
         <!--Uncomment to see an alignment grid to help ensure your controls are
             aligned on common boundaries.  The image has a top margin of -32px to
