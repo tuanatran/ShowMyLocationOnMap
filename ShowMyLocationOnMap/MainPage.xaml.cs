@@ -26,7 +26,8 @@ namespace ShowMyLocationOnMap
         // Constructor
         public MainPage()
         {
-            InitializeComponent();      
+            InitializeComponent();
+            ShowMyLocationOnTheMap();
         }
 
 
@@ -34,24 +35,35 @@ namespace ShowMyLocationOnMap
         {
             if (IsolatedStorageSettings.ApplicationSettings.Contains("LocationConsent"))
             {
-                // User has opted in or out of Location
-                return;
+                // User has opted in for Location
+                if (IsolatedStorageSettings.ApplicationSettings["LocationConsent"].Equals(true))
+                {
+                    return;
+                }
+                // User has opted out for location. Ask again for consent.
+                GetLocationConsent();
             }
             else
             {
-                MessageBoxResult result = MessageBox.Show("This app accesses your phone's location. Is that ok?","Location", MessageBoxButton.OKCancel);
+                GetLocationConsent(); 
+            }
+        }
 
-                if (result == MessageBoxResult.OK)
-                {
-                    IsolatedStorageSettings.ApplicationSettings["LocationConsent"] = true;
-                    ShowMyLocationOnTheMap();
-                }
-                else
-                {
-                    IsolatedStorageSettings.ApplicationSettings["LocationConsent"] = false;
-                }
+        private static void GetLocationConsent()
+        {
+            MessageBoxResult result = MessageBox.Show("This app accesses your phone's location. Is that ok?", "Location", MessageBoxButton.OKCancel);
 
+            if (result == MessageBoxResult.OK)
+            {
+                IsolatedStorageSettings.ApplicationSettings["LocationConsent"] = true;
                 IsolatedStorageSettings.ApplicationSettings.Save();
+
+            }
+            else
+            {
+                IsolatedStorageSettings.ApplicationSettings["LocationConsent"] = false;
+                IsolatedStorageSettings.ApplicationSettings.Save();
+                Application.Current.Terminate();
             }
         }
 
@@ -194,7 +206,5 @@ namespace ShowMyLocationOnMap
                 StatusTextBlock.Text = "stopped";
             }
         }
-
-
     }
 }
