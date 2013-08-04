@@ -26,9 +26,7 @@ namespace ShowMyLocationOnMap
         // Constructor
         public MainPage()
         {
-            InitializeComponent();
-            ShowMyLocationOnTheMap();
-                      
+            InitializeComponent();      
         }
 
 
@@ -46,6 +44,7 @@ namespace ShowMyLocationOnMap
                 if (result == MessageBoxResult.OK)
                 {
                     IsolatedStorageSettings.ApplicationSettings["LocationConsent"] = true;
+                    ShowMyLocationOnTheMap();
                 }
                 else
                 {
@@ -105,7 +104,7 @@ namespace ShowMyLocationOnMap
             mapWithMyLocation.Layers.Add(myLocationLayer);
         }
 
-        private void Go_Click(object sender, RoutedEventArgs e)
+        private void Route_Click(object sender, RoutedEventArgs e)
         {
             string endLocation = End.Text;
             MapsDirectionsTask mapsDirectionsTask = new MapsDirectionsTask();
