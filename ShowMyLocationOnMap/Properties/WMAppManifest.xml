@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Deployment xmlns="http://schemas.microsoft.com/windowsphone/2012/deployment" AppPlatformVersion="8.0">
   <DefaultLanguage xmlns="" code="en-US" />
-  <App xmlns="" ProductID="{54e5d3e5-8646-4311-ba15-775b55f24a92}" Title="ShowMyLocationOnMap" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal" Author="ShowMyLocationOnMap author" Description="Sample description" Publisher="ShowMyLocationOnMap" PublisherID="{7cb0427c-c63d-4160-a64b-6058567c963d}">
-    <IconPath IsRelative="true" IsResource="false">Assets\ApplicationIcon.png</IconPath>
+  <App xmlns="" ProductID="{54e5d3e5-8646-4311-ba15-775b55f24a92}" Title="Route Watch" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal" Author="ShowMyLocationOnMap author" Description="Route Watch mobile application" Publisher="ShowMyLocationOnMap" PublisherID="{7cb0427c-c63d-4160-a64b-6058567c963d}">
+    <IconPath IsRelative="true" IsResource="false">SmallTile.png</IconPath>
     <Capabilities>
       <Capability Name="ID_CAP_NETWORKING" />
       <Capability Name="ID_CAP_MEDIALIB_AUDIO" />
@@ -11,6 +11,7 @@
       <Capability Name="ID_CAP_WEBBROWSERCOMPONENT" />
       <Capability Name="ID_CAP_LOCATION" />
       <Capability Name="ID_CAP_MAP" />
+      <Capability Name="ID_CAP_PUSH_NOTIFICATION" />
     </Capabilities>
     <Tasks>
       <DefaultTask Name="_default" NavigationPage="MainPage.xaml" />
@@ -18,9 +19,9 @@
     <Tokens>
       <PrimaryToken TokenID="ShowMyLocationOnMapToken" TaskName="_default">
         <TemplateFlip>
-          <SmallImageURI IsRelative="true" IsResource="false">Assets\Tiles\FlipCycleTileSmall.png</SmallImageURI>
+          <SmallImageURI IsRelative="true" IsResource="false">StoreTile.png</SmallImageURI>
           <Count>0</Count>
-          <BackgroundImageURI IsRelative="true" IsResource="false">Assets\Tiles\FlipCycleTileMedium.png</BackgroundImageURI>
+          <BackgroundImageURI IsRelative="true" IsResource="false">LiveTile.png</BackgroundImageURI>
           <Title>ShowMyLocationOnMap</Title>
           <BackContent>
           </BackContent>
@@ -30,8 +31,7 @@
           </BackTitle>
           <DeviceLockImageURI>
           </DeviceLockImageURI>
-          <HasLarge>
-          </HasLarge>
+          <HasLarge>False</HasLarge>
         </TemplateFlip>
       </PrimaryToken>
     </Tokens>

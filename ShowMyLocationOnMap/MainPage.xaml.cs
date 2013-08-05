@@ -16,20 +16,66 @@ using System.Windows.Shapes;
 using System.Threading.Tasks;
 using System.IO.IsolatedStorage;
 using Microsoft.Phone.Tasks;
+using Microsoft.WindowsAzure.MobileServices;
+using Newtonsoft.Json;
 
 namespace ShowMyLocationOnMap
 {
     public partial class MainPage : PhoneApplicationPage
     {
+
+        private MobileServiceCollection<DriverDelivery, DriverDelivery> items;
+        private IMobileServiceTable<DriverDelivery> todoTable = App.MobileService.GetTable<DriverDelivery>();
+
+        public class DriverDelivery
+        {
+            public int Id { get; set; }
+
+            [JsonProperty(PropertyName = "firstName")]
+            public string FirstName { get; set; }
+
+            [JsonProperty(PropertyName = "lastName")]
+            public string LastName { get; set; }
+
+            [JsonProperty(PropertyName = "completedDeliveries")]
+            public int CompletedDeliveries { get; set; }
+
+            [JsonProperty(PropertyName = "totalDeliveries")]
+            public int CompletedDeliveries { get; set; }
+        }
+
         Geolocator geolocator = null;
         bool tracking = false;
         // Constructor
         public MainPage()
         {
             InitializeComponent();
-            ShowMyLocationOnTheMap();
+            this.Loaded += MainPage_Loaded;
+            //ShowMyLocationOnTheMap();
         }
 
+        private MobileServiceUser user;
+        private async System.Threading.Tasks.Task Authenticate()
+        {
+            while (user == null)
+            {
+                string message;
+                try
+                {
+                    user = await App.MobileService
+                        .LoginAsync(MobileServiceAuthenticationProvider.MicrosoftAccount);
+                    message =
+                        string.Format("You are now logged in - {0}", user.UserId);
+                }
+                catch (InvalidOperationException)
+                {
+                    message = "You must log in. Login Required";
+                }
+
+
+                MessageBox.Show(message);
+            }
+        }
 
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
@@ -67,21 +113,6 @@ namespace ShowMyLocationOnMap
             }
         }
 
-        // Sample code for building a localized ApplicationBar
-        //private void BuildLocalizedApplicationBar()
-        //{
-        //    // Set the page's ApplicationBar to a new instance of ApplicationBar.
-        //    ApplicationBar = new ApplicationBar();
-
-        //    // Create a new button and set the text value to the localized string from AppResources.
-        //    ApplicationBarIconButton appBarButton = new ApplicationBarIconButton(new Uri("/Assets/AppBar/appbar.add.rest.png", UriKind.Relative));
-        //    appBarButton.Text = AppResources.AppBarButtonText;
-        //    ApplicationBar.Buttons.Add(appBarButton);
-
-        //    // Create a new menu item with the localized string from AppResources.
-        //    ApplicationBarMenuItem appBarMenuItem = new ApplicationBarMenuItem(AppResources.AppBarMenuItemText);
-        //    ApplicationBar.MenuItems.Add(appBarMenuItem);
-        //}
         private async void ShowMyLocationOnTheMap()
         {
             // Get my current location.
@@ -205,6 +236,12 @@ namespace ShowMyLocationOnMap
                 TrackLocationButton.Content = "track location";
                 StatusTextBlock.Text = "stopped";
             }
+        }
+
+        async void MainPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            await Authenticate();
+            RefreshRoutes();
         }
     }
 }
