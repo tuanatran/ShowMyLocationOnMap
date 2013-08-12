@@ -46,6 +46,7 @@ namespace ShowMyLocationOnMap
 
         Geolocator geolocator = null;
         bool tracking = false;
+
         // Constructor
         public MainPage()
         {
@@ -79,10 +80,10 @@ namespace ShowMyLocationOnMap
 
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
-            if (IsolatedStorageSettings.ApplicationSettings.Contains("LocationConsent"))
+            if (settings.Contains("LocationConsent"))
             {
                 // User has opted in for Location
-                if (IsolatedStorageSettings.ApplicationSettings["LocationConsent"].Equals(true))
+                if (settings["LocationConsent"].Equals(true))
                 {
                     return;
                 }
@@ -111,6 +112,10 @@ namespace ShowMyLocationOnMap
                 IsolatedStorageSettings.ApplicationSettings.Save();
                 Application.Current.Terminate();
             }
+        }
+
+        private static void GetDisableUserIdleDetectionConsent()
+        {
         }
 
         private async void ShowMyLocationOnTheMap()
@@ -241,7 +246,6 @@ namespace ShowMyLocationOnMap
         async void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
             await Authenticate();
-            RefreshRoutes();
         }
     }
 }
