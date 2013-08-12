@@ -95,7 +95,6 @@ namespace ShowMyLocationOnMap
                     }
                     SettingsContainer.FirstRunTime.Value = DateTime.Now;
                 }
-
                 return true;
             }
             catch (Exception ex)

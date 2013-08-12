@@ -14,7 +14,6 @@ namespace ShowMyLocationOnMap
             FirstRunTime,
             LiveConnectToken,
             AuthType,
-            LocalPassword,
             EnableLocation,
             DisableApplicationIdleDetection,
             DisableUserIdleDetection
@@ -22,7 +21,7 @@ namespace ShowMyLocationOnMap
 
         /// <summary>
         // set the default settings
-        // the IsolatedStorageProperty will set properties if they do not exist, otherwise will get
+        // the IsolatedStorageProperty will set properties if they do not exist
         /// </summary>
 
         // Keeps the first login time
@@ -34,11 +33,10 @@ namespace ShowMyLocationOnMap
             new IsolatedStorageProperty<bool>(SETTINGS_OPTIONS.DisableApplicationIdleDetection.ToString(), false);
         public static readonly IsolatedStorageProperty<bool> DisableUserIdleDetection =
             new IsolatedStorageProperty<bool>(SETTINGS_OPTIONS.DisableUserIdleDetection.ToString(), false);
-        public static readonly IsolatedStorageProperty<string> LocalPassword =
-            new IsolatedStorageProperty<string>(SETTINGS_OPTIONS.LocalPassword.ToString(), String.Empty);
         public static readonly IsolatedStorageProperty<string> LiveConnectToken =
             new IsolatedStorageProperty<string>(SETTINGS_OPTIONS.LiveConnectToken.ToString(), String.Empty);
         public static readonly IsolatedStorageProperty<MobileServiceAuthenticationProvider> AuthType =
-            new IsolatedStorageProperty<MobileServiceAuthenticationProvider>(SETTINGS_OPTIONS.AuthType.ToString(), MobileServiceAuthenticationProvider.MicrosoftAccount);
+            new IsolatedStorageProperty<MobileServiceAuthenticationProvider>(SETTINGS_OPTIONS.AuthType.ToString(), 
+                MobileServiceAuthenticationProvider.MicrosoftAccount);
     }
 }
