@@ -19,13 +19,16 @@
         <TextBlock Height="32" HorizontalAlignment="Right" Margin="12,78,0,0" Name="infoTextBlock" Text="" VerticalAlignment="Bottom" Width="419" />
 
         <!--TitlePanel contains the name of the application and page title-->
-        <StackPanel Grid.Row="0" Margin="12,17,0,28">
+        <StackPanel Grid.Row="0" Margin="7,17,5,28">
             <TextBlock Text="DELIVERY JOURNAL" Style="{StaticResource PhoneTextNormalStyle}"/>
             <TextBlock Text="Settings" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
         </StackPanel>
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
+            <CheckBox Content="Enable Location Service" HorizontalAlignment="Left" Margin="29,191,0,0" VerticalAlignment="Top" Height="79"/>
+            <CheckBox Content="Disable Application Idle Detection" HorizontalAlignment="Left" Margin="29,236,0,0" VerticalAlignment="Top" Checked="CheckBox_Checked"/>
+            <CheckBox Content="Disable User Idle Detection" HorizontalAlignment="Left" Margin="29,281,0,0" VerticalAlignment="Top" Checked="CheckBox_Checked"/>
 
         </Grid>
     </Grid>

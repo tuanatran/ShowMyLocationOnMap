@@ -11,6 +11,7 @@ using Microsoft.WindowsAzure.MobileServices;
 using System.Threading.Tasks;
 using Microsoft.Live;
 using Microsoft.Live.Controls;
+using System.Text;
 
 namespace ShowMyLocationOnMap
 {
@@ -100,7 +101,9 @@ namespace ShowMyLocationOnMap
             catch (Exception ex)
             {
                 SettingsContainer.LiveConnectToken.Value = String.Empty;
-
+                StringBuilder message = new StringBuilder("An exception of type ");
+                message.Append(ex.GetType()).Append(" from source ").Append(ex.Source).Append(" occurred: ").Append(ex.Message);
+                MessageBox.Show(message.ToString());
                 return false;
             }
         }
