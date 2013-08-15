@@ -22,7 +22,7 @@
           <SmallImageURI IsRelative="true" IsResource="false">StoreTile.png</SmallImageURI>
           <Count>0</Count>
           <BackgroundImageURI IsRelative="true" IsResource="false">LiveTile.png</BackgroundImageURI>
-          <Title>ShowMyLocationOnMap</Title>
+          <Title>Route Watch</Title>
           <BackContent>
           </BackContent>
           <BackBackgroundImageURI>

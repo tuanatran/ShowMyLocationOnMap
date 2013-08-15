@@ -15,7 +15,8 @@
 
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
-        <my:SignInButton Name="btnSignin" ClientId="00000000440FDE10" Scopes="wl.signin wl.basic" Branding="MicrosoftAccount"  TextType="SignIn" SessionChanged="btnSignin_SessionChanged" HorizontalAlignment="Right"  VerticalAlignment="Top" />
+        <my:SignInButton Name="btnSignin" ClientId="00000000440FDE10" Scopes="wl.signin wl.basic" Branding="MicrosoftAccount"  
+	TextType="SignIn" SessionChanged="btnSignin_SessionChanged" HorizontalAlignment="Right"  VerticalAlignment="Top" />
         <TextBlock Height="32" HorizontalAlignment="Right" Margin="12,78,0,0" Name="infoTextBlock" Text="" VerticalAlignment="Bottom" Width="419" />
 
         <!--TitlePanel contains the name of the application and page title-->
@@ -26,9 +27,12 @@
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            <CheckBox Content="Enable Location Service" HorizontalAlignment="Left" Margin="29,191,0,0" VerticalAlignment="Top" Height="79"/>
-            <CheckBox Content="Disable Application Idle Detection" HorizontalAlignment="Left" Margin="29,236,0,0" VerticalAlignment="Top" Checked="CheckBox_Checked"/>
-            <CheckBox Content="Disable User Idle Detection" HorizontalAlignment="Left" Margin="29,281,0,0" VerticalAlignment="Top" Checked="CheckBox_Checked"/>
+            <CheckBox Name="CheckBox_LocationService" Content="Enable Location Service" 
+                      HorizontalAlignment="Left" Margin="29,191,0,0" VerticalAlignment="Top" Height="79" 
+                      Checked="CheckBox_LocationService_Checked"
+                      Unchecked="CheckBox_LocationService_Unchecked"/>
+            <CheckBox Content="Disable Application Idle Detection" HorizontalAlignment="Left" Margin="29,236,0,0" VerticalAlignment="Top" />
+            <CheckBox Content="Disable User Idle Detection" HorizontalAlignment="Left" Margin="29,281,0,0" VerticalAlignment="Top" />
 
         </Grid>
     </Grid>

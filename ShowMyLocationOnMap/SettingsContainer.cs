@@ -11,10 +11,10 @@ namespace ShowMyLocationOnMap
     {
         public enum SETTINGS_OPTIONS
         {
-            FirstRunTime,
+            SessionExpires,
             LiveConnectToken,
             AuthType,
-            EnableLocation,
+            LocationConsent,
             DisableApplicationIdleDetection,
             DisableUserIdleDetection
         }
@@ -25,10 +25,10 @@ namespace ShowMyLocationOnMap
         /// </summary>
 
         // Keeps the first login time
-        public static readonly IsolatedStorageProperty<DateTime> FirstRunTime =
-            new IsolatedStorageProperty<DateTime>(SETTINGS_OPTIONS.FirstRunTime.ToString(), DateTime.Now);
-        public static readonly IsolatedStorageProperty<bool> EnableLocation =
-            new IsolatedStorageProperty<bool>(SETTINGS_OPTIONS.EnableLocation.ToString(), false);
+        public static readonly IsolatedStorageProperty<DateTime> SessionExpires =
+            new IsolatedStorageProperty<DateTime>(SETTINGS_OPTIONS.SessionExpires.ToString(), DateTime.Now);
+        public static readonly IsolatedStorageProperty<bool> LocationConsent =
+            new IsolatedStorageProperty<bool>(SETTINGS_OPTIONS.LocationConsent.ToString(), false);
         public static readonly IsolatedStorageProperty<bool> DisableApplicationIdleDetection =
             new IsolatedStorageProperty<bool>(SETTINGS_OPTIONS.DisableApplicationIdleDetection.ToString(), false);
         public static readonly IsolatedStorageProperty<bool> DisableUserIdleDetection =

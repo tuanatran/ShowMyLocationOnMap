@@ -24,7 +24,7 @@ namespace ShowMyLocationOnMap
     public partial class MainPage : PhoneApplicationPage
     {
 
-        private MobileServiceCollection<DriverDelivery, DriverDelivery> items;
+        //private MobileServiceCollection<DriverDelivery, DriverDelivery> items;
         private IMobileServiceTable<DriverDelivery> todoTable = App.MobileService.GetTable<DriverDelivery>();
 
         public class DriverDelivery
@@ -41,7 +41,7 @@ namespace ShowMyLocationOnMap
             public int CompletedDeliveries { get; set; }
 
             [JsonProperty(PropertyName = "totalDeliveries")]
-            public int CompletedDeliveries { get; set; }
+            public int TotalDeliveries { get; set; }
         }
 
         Geolocator geolocator = null;
@@ -52,67 +52,33 @@ namespace ShowMyLocationOnMap
         {
             InitializeComponent();
             this.Loaded += MainPage_Loaded;
-            //ShowMyLocationOnTheMap();
+            ShowMyLocationOnTheMap();
         }
 
-        private MobileServiceUser user;
-        private async System.Threading.Tasks.Task Authenticate()
-        {
-            while (user == null)
-            {
-                string message;
-                try
-                {
-                    user = await App.MobileService
-                        .LoginAsync(MobileServiceAuthenticationProvider.MicrosoftAccount);
-                    message =
-                        string.Format("You are now logged in - {0}", user.UserId);
-                }
-                catch (InvalidOperationException)
-                {
-                    message = "You must log in. Login Required";
-                }
+        //private MobileServiceUser user;
+        //private async System.Threading.Tasks.Task Authenticate()
+        //{
+        //    while (user == null)
+        //    {
+        //        string message;
+        //        try
+        //        {
+        //            user = await App.MobileService
+        //                .LoginAsync(MobileServiceAuthenticationProvider.MicrosoftAccount);
+        //            message =
+        //                string.Format("You are now logged in - {0}", user.UserId);
+        //        }
+        //        catch (InvalidOperationException)
+        //        {
+        //            message = "You must log in. Login Required";
+        //        }
 
 
-                MessageBox.Show(message);
-            }
-        }
+        //        MessageBox.Show(message);
+        //    }
+        //}
 
-        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
-        {
-            if (settings.Contains("LocationConsent"))
-            {
-                // User has opted in for Location
-                if (settings["LocationConsent"].Equals(true))
-                {
-                    return;
-                }
-                // User has opted out for location. Ask again for consent.
-                GetLocationConsent();
-            }
-            else
-            {
-                GetLocationConsent(); 
-            }
-        }
 
-        private static void GetLocationConsent()
-        {
-            MessageBoxResult result = MessageBox.Show("This app accesses your phone's location. Is that ok?", "Location", MessageBoxButton.OKCancel);
-
-            if (result == MessageBoxResult.OK)
-            {
-                IsolatedStorageSettings.ApplicationSettings["LocationConsent"] = true;
-                IsolatedStorageSettings.ApplicationSettings.Save();
-
-            }
-            else
-            {
-                IsolatedStorageSettings.ApplicationSettings["LocationConsent"] = false;
-                IsolatedStorageSettings.ApplicationSettings.Save();
-                Application.Current.Terminate();
-            }
-        }
 
         private static void GetDisableUserIdleDetectionConsent()
         {
@@ -243,9 +209,9 @@ namespace ShowMyLocationOnMap
             }
         }
 
-        async void MainPage_Loaded(object sender, RoutedEventArgs e)
+        void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-            await Authenticate();
+            //await Authenticate();
         }
     }
 }

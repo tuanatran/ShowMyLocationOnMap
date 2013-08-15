@@ -26,7 +26,7 @@ namespace ShowMyLocationOnMap
 
         public static MobileServiceUser CurrentUser { get; set; }
 
-        public static const string APP_AUTHKEY_LIVECONNECT = "00000000440FDE10";
+        public static string APP_AUTHKEY_LIVECONNECT = "00000000440FDE10";
 
         /// <summary>
         /// Constructor for the Application object.

@@ -17,84 +17,154 @@ namespace ShowMyLocationOnMap
 {
     public partial class SettingsPage : PhoneApplicationPage
     {
-        string authType = SettingsContainer.AuthType.Value.ToString();
-        private LiveConnectClient client;
+        private MobileServiceAuthenticationProvider authType = SettingsContainer.AuthType.Value;
+        private LiveAuthClient _authClient = new LiveAuthClient(App.APP_AUTHKEY_LIVECONNECT);
+        private LiveConnectClient _client;
         private LiveConnectSession _session;
+        private bool retry = false;
+
         public SettingsPage()
         {
             InitializeComponent();
             Loaded += OnLoaded;
         }
 
-        private async void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
+        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
-            await AttemptLogin(authType);
+            CheckBox_LocationService.IsChecked = SettingsContainer.LocationConsent.Value;
+            SetSettings();
         }
 
-        private async void btnSignin_SessionChanged(object sender, LiveConnectSessionChangedEventArgs e)
+        private void Refresh()
         {
-            if (e.Status == LiveConnectSessionStatus.Connected)
+            NavigationService.Navigate(new Uri("/SettingsPage.xaml?" + DateTime.Now.Ticks, UriKind.Relative));
+        }
+
+        private void SetSettings()
+        {
+            // User must give location service consent for app to function
+            while (!SettingsContainer.LocationConsent.Value)
             {
-                client = new LiveConnectClient(e.Session);
-                LiveOperationResult operationResult = await client.GetAsync("me");
-                try
+                // User has not opted in for Location
+                GetLocationConsent(retry);
+            }
+        }
+
+        private void GetLocationConsent(bool retry)
+        {
+            MessageBoxResult result = MessageBox.Show("This app accesses your phone's location. Is that ok?", 
+                "Location", MessageBoxButton.OKCancel);
+
+            if (result == MessageBoxResult.OK)
+            {
+                SettingsContainer.LocationConsent.Value = true;                
+            }
+            else
+            {
+                if (!retry)
                 {
-                    dynamic meResult = operationResult.Result;
-                    if (meResult.first_name != null &&
-                        meResult.last_name != null)
+                    result = MessageBox.
+                        Show("This app will not function without your location. Press 'ok' to provide consent or 'cancel' to close.", 
+                        "Location", MessageBoxButton.OKCancel);
+
+                    if (result == MessageBoxResult.OK)
                     {
-                        infoTextBlock.Text = "Hello " +
-                            meResult.first_name + " " +
-                            meResult.last_name + "!";
+                        SettingsContainer.LocationConsent.Value = true;
+                        Refresh();
                     }
                     else
                     {
-                        infoTextBlock.Text = "Hello, signed-in user!";
+                        MessageBox.Show("This app will now close.", "Location", MessageBoxButton.OK);
+                        if (result == MessageBoxResult.OK)
+                        {
+                            Application.Current.Terminate();
+                        }
                     }
                 }
-                catch (LiveConnectException exception)
-                {
-                    this.infoTextBlock.Text = "Error calling API: " +
-                        exception.Message;
-                }
+            }
+        }
+
+        private async void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
+        {
+            bool loginTask = await AttemptLogin(authType);
+            if (!loginTask)
+            {
+                MessageBox.Show("Login failed. ");
+            }
+        }
+
+        private void btnSignin_SessionChanged(object sender, LiveConnectSessionChangedEventArgs e)
+        {
+            if (e.Status == LiveConnectSessionStatus.Connected)
+            {
+                _session = e.Session;
+                _client = new LiveConnectClient(_session);
+                infoTextBlock.Text = "Signed in.";
             }
             else
             {
                 infoTextBlock.Text = "Not signed in.";
+                _client = null;
             }
         }
 
-        public async Task<bool> AttemptLogin(string authType)
+
+        public async Task<bool> AttemptLogin(MobileServiceAuthenticationProvider authType)
         {
             try
             {
-                if (authType == typeof(MobileServiceAuthenticationProvider).ToString())
+                if (authType.GetType() == typeof(MobileServiceAuthenticationProvider))
                 {
-                    if (!String.IsNullOrEmpty(SettingsContainer.LiveConnectToken.Value))
+                    if (String.IsNullOrEmpty(SettingsContainer.LiveConnectToken.Value) && App.CurrentUser == null)
                     {
                         App.CurrentUser = await App.MobileService.LoginAsync(MobileServiceAuthenticationProvider.MicrosoftAccount);
                     }
-                    else
+                    try
                     {
-                        var liveIdClient = new LiveAuthClient(App.APP_AUTHKEY_LIVECONNECT);
-
-                        while (_session == null)
+                        LiveLoginResult initializeResult = await _authClient.InitializeAsync();
+                        if (initializeResult.Status == LiveConnectSessionStatus.Connected)
                         {
-                            var result = await liveIdClient.LoginAsync(new[] { "wl.signin" });
-
-                            if (result.Status != LiveConnectSessionStatus.Connected)
+                            _session = _authClient.Session;
+                        }
+                        else
+                        {
+                            LiveLoginResult loginResult = await _authClient.LoginAsync(
+                                new[] { "wl.signin", "wl.basic", "wl.offline_access" });
+                            if (loginResult.Status == LiveConnectSessionStatus.Connected)
                             {
-                                continue;
+                                _session = _authClient.Session;
                             }
-
-                            _session = result.Session;
-
-                            App.CurrentUser = await App.MobileService.LoginWithMicrosoftAccountAsync(result.Session.AuthenticationToken);
-
-                            SettingsContainer.LiveConnectToken.Value = result.Session.AuthenticationToken;
+                        }
+                        try
+                        {
+                            _client = new LiveConnectClient(_session);
+                            LiveOperationResult operationResult = await _client.GetAsync("me");
+                            dynamic result = operationResult.Result;
+                            if (result != null)
+                            {
+                                this.infoTextBlock.Text = string.Join(" ", "Hello", result.name, "!");
+                            }
+                            else
+                            {
+                                this.infoTextBlock.Text = "Error getting name.";
+                            }
+                            App.CurrentUser = await App.MobileService.LoginWithMicrosoftAccountAsync(_session.AuthenticationToken);
+                            SettingsContainer.LiveConnectToken.Value = _session.AuthenticationToken;
+                            SettingsContainer.SessionExpires.Value = DateTime.UtcNow.Add(_session.Expires.Offset);
+                        }
+                        catch (LiveAuthException exception)
+                        {
+                            this.infoTextBlock.Text = "Error signing in: " + exception.Message;
+                        }
+                        catch (LiveConnectException exception)
+                        {
+                            this.infoTextBlock.Text = "Error calling API: " + exception.Message;
                         }
                     }
-                    SettingsContainer.FirstRunTime.Value = DateTime.Now;
+                    catch (LiveAuthException exception)
+                    {
+                        this.infoTextBlock.Text = "Error initializing: " + exception.Message;
+                    }
                 }
                 return true;
             }
@@ -108,6 +178,14 @@ namespace ShowMyLocationOnMap
             }
         }
 
+        private void CheckBox_LocationService_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SettingsContainer.LocationConsent.Value = false;
+        }
 
+        private void CheckBox_LocationService_Checked(object sender, RoutedEventArgs e)
+        {
+            SettingsContainer.LocationConsent.Value = true;
+        }
     }
 }
