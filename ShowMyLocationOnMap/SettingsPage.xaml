@@ -31,8 +31,8 @@
                       HorizontalAlignment="Left" Margin="29,191,0,0" VerticalAlignment="Top" Height="79" 
                       Checked="CheckBox_LocationService_Checked"
                       Unchecked="CheckBox_LocationService_Unchecked"/>
-            <CheckBox Content="Disable Application Idle Detection" HorizontalAlignment="Left" Margin="29,236,0,0" VerticalAlignment="Top" />
-            <CheckBox Content="Disable User Idle Detection" HorizontalAlignment="Left" Margin="29,281,0,0" VerticalAlignment="Top" />
+            <CheckBox x:Name="CheckBox_DisableAppIdle" Content="Disable Application Idle Detection" HorizontalAlignment="Left" Margin="29,305,0,0" VerticalAlignment="Top" Checked="CheckBox_DisableAppIdle_Checked" />
+            <CheckBox x:Name="CheckBox_DisableUserIdle" Content="Disable User Idle Detection" HorizontalAlignment="Left" Margin="29,249,0,0" VerticalAlignment="Top" Checked="CheckBox_DisableUserIdle_Checked" Unchecked="CheckBox_DisableUserIdle_Unchecked" />
 
         </Grid>
     </Grid>

@@ -47,35 +47,6 @@ namespace ShowMyLocationOnMap
             ShowMyLocationOnTheMap();
         }
 
-        //private MobileServiceUser user;
-        //private async System.Threading.Tasks.Task Authenticate()
-        //{
-        //    while (user == null)
-        //    {
-        //        string message;
-        //        try
-        //        {
-        //            user = await App.MobileService
-        //                .LoginAsync(MobileServiceAuthenticationProvider.MicrosoftAccount);
-        //            message =
-        //                string.Format("You are now logged in - {0}", user.UserId);
-        //        }
-        //        catch (InvalidOperationException)
-        //        {
-        //            message = "You must log in. Login Required";
-        //        }
-
-
-        //        MessageBox.Show(message);
-        //    }
-        //}
-
-
-
-        private static void GetDisableUserIdleDetectionConsent()
-        {
-        }
-
         private async void ShowMyLocationOnTheMap()
         {
             // Get my current location.
@@ -203,7 +174,6 @@ namespace ShowMyLocationOnMap
 
         void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-            //await Authenticate();
         }
     }
 }

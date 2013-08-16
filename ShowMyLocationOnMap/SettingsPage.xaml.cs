@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Live;
 using Microsoft.Live.Controls;
 using System.Text;
+using Microsoft.Phone.Shell;
 
 namespace ShowMyLocationOnMap
 {
@@ -27,7 +28,19 @@ namespace ShowMyLocationOnMap
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
             CheckBox_LocationService.IsChecked = SettingsContainer.LocationConsent.Value;
-            SetSettings();
+            CheckBox_DisableUserIdle.IsChecked = SettingsContainer.DisableUserIdleDetection.Value;
+            CheckBox_DisableAppIdle.IsChecked = SettingsContainer.DisableApplicationIdleDetection.Value;
+            if (CheckBox_DisableAppIdle.IsChecked.Value)
+            {
+                CheckBox_DisableAppIdle.IsEnabled = false;
+            }
+            SetLocationConsent();
+            // only force set this when user first signs into the app
+            // it is optional so leave user setting until user signs out
+            if (String.IsNullOrEmpty(SettingsContainer.LiveConnectToken.Value))
+            {
+                SetUserIdleDetection();
+            }
         }
 
         private void Refresh()
@@ -35,7 +48,46 @@ namespace ShowMyLocationOnMap
             NavigationService.Navigate(new Uri("/SettingsPage.xaml?" + DateTime.Now.Ticks, UriKind.Relative));
         }
 
-        private void SetSettings()
+        private void SetApplicationIdleDetection()
+        {
+            StringBuilder msgText = new StringBuilder();
+            msgText.Append("It is recommended that you disable Application Idle detection. If this is not done, the application ");
+            msgText.Append("will not run when the lock screen is engaged. When this is disabled, it will remain disabled until ");
+            msgText.Append("your current session ends. Would you like to diable application idle detection now?");
+            MessageBoxResult result = MessageBox.Show(msgText.ToString(), "ApplicationIdleDetectionMode", MessageBoxButton.OKCancel);
+            if (result == MessageBoxResult.OK)
+            {
+                PhoneApplicationService.Current.ApplicationIdleDetectionMode = IdleDetectionMode.Disabled;
+                SettingsContainer.DisableApplicationIdleDetection.Value = true;
+                CheckBox_DisableAppIdle.IsChecked = true;
+                CheckBox_DisableAppIdle.IsEnabled = false;
+            }
+        }
+
+        private void SetUserIdleDetection()
+        {
+            if (!SettingsContainer.DisableUserIdleDetection.Value)
+            {
+                StringBuilder msgText = new StringBuilder();
+                msgText.Append("This app is intended to be run while being charged. Disabling application ");
+                msgText.Append("idle detection will ensure that the screen does not turn off while navigating. ");
+                msgText.Append("Detection will be disabled only while this app is running, but you can manually enable ");
+                msgText.Append("it from the Settings page.");
+                MessageBox.Show(msgText.ToString());
+                PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Disabled;
+                SettingsContainer.DisableUserIdleDetection.Value = true;
+                CheckBox_DisableUserIdle.IsChecked = true;
+                Refresh();
+            }
+            else
+            {
+                SettingsContainer.DisableUserIdleDetection.Value = false;
+                PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Enabled;
+                CheckBox_DisableUserIdle.IsChecked = false;
+            }
+        }
+
+        private void SetLocationConsent()
         {
             // User must give location service consent for app to function
             while (!SettingsContainer.LocationConsent.Value)
@@ -69,11 +121,8 @@ namespace ShowMyLocationOnMap
                     }
                     else
                     {
-                        MessageBox.Show("This app will now close.", "Location", MessageBoxButton.OK);
-                        if (result == MessageBoxResult.OK)
-                        {
-                            Application.Current.Terminate();
-                        }
+                        MessageBox.Show("This app will now close.");
+                        Application.Current.Terminate();
                     }
                 }
             }
@@ -176,11 +225,29 @@ namespace ShowMyLocationOnMap
         private void CheckBox_LocationService_Unchecked(object sender, RoutedEventArgs e)
         {
             SettingsContainer.LocationConsent.Value = false;
+            retry = false;
+            SetLocationConsent();
         }
 
         private void CheckBox_LocationService_Checked(object sender, RoutedEventArgs e)
         {
             SettingsContainer.LocationConsent.Value = true;
+            Refresh();
+        }
+
+        private void CheckBox_DisableAppIdle_Checked(object sender, RoutedEventArgs e)
+        {
+            SetApplicationIdleDetection();
+        }
+
+        private void CheckBox_DisableUserIdle_Checked(object sender, RoutedEventArgs e)
+        {
+            SetUserIdleDetection();
+        }
+
+        private void CheckBox_DisableUserIdle_Unchecked(object sender, RoutedEventArgs e)
+        {
+            SetUserIdleDetection();
         }
     }
 }

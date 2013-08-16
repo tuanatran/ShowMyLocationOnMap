@@ -42,12 +42,6 @@ namespace ShowMyLocationOnMap
             // Phone-specific initialization
             InitializePhoneApplication();
 
-            //disable ApplicationIdleDetectionMode
-            //DisableApplicationIdleDetection(bool);
-
-            //disable UserIdleDetectionMode
-            //DisableUserIdlelDetection(bool consent);
-
             // Language display initialization
             InitializeLanguage();
 
@@ -73,30 +67,16 @@ namespace ShowMyLocationOnMap
 
         }
 
-        private void DisableUserIdlelDetection(bool consent)
-        {
-            if (!consent)
-            {
-
-            }
-        }
-
-        private void DisableApplicationIdleDetection(bool consent)
-        {
-        }
-
         // Code to execute when the application is launching (eg, from Start)
         // This code will not execute when the application is reactivated
         private void Application_Launching(object sender, LaunchingEventArgs e)
         {
-            PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Disabled;
         }
 
         // Code to execute when the application is activated (brought to foreground)
         // This code will not execute when the application is first launched
         private void Application_Activated(object sender, ActivatedEventArgs e)
         {
-            PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Disabled;
         }
 
         // Code to execute when the application is deactivated (sent to background)
@@ -109,6 +89,7 @@ namespace ShowMyLocationOnMap
         // This code will not execute when the application is deactivated
         private void Application_Closing(object sender, ClosingEventArgs e)
         {
+            SettingsContainer.DisableApplicationIdleDetection.Value = false;
         }
 
         // Code to execute if a navigation fails
