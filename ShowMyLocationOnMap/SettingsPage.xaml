@@ -26,14 +26,12 @@
         </StackPanel>
 
         <!--ContentPanel - place additional content here-->
-        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            <CheckBox Name="CheckBox_LocationService" Content="Enable Location Service" 
-                      HorizontalAlignment="Left" Margin="29,191,0,0" VerticalAlignment="Top" Height="79" 
-                      Checked="CheckBox_LocationService_Checked"
-                      Unchecked="CheckBox_LocationService_Unchecked"/>
-            <CheckBox x:Name="CheckBox_DisableAppIdle" Content="Disable Application Idle Detection" HorizontalAlignment="Left" Margin="29,305,0,0" VerticalAlignment="Top" Checked="CheckBox_DisableAppIdle_Checked" />
-            <CheckBox x:Name="CheckBox_DisableUserIdle" Content="Disable User Idle Detection" HorizontalAlignment="Left" Margin="29,249,0,0" VerticalAlignment="Top" Checked="CheckBox_DisableUserIdle_Checked" Unchecked="CheckBox_DisableUserIdle_Unchecked" />
-
+            <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
+            <CheckBox Name="CheckBox_LocationService" Content="Enable Location Service" HorizontalAlignment="Right" Margin="0,191,123,0" VerticalAlignment="Top" Height="79" Checked="CheckBox_LocationService_Checked" Unchecked="CheckBox_LocationService_Unchecked"/>
+            <CheckBox x:Name="CheckBox_UserIdleDetectionDisabled" Content="Disable User Idle Detection" HorizontalAlignment="Left" Margin="29,249,0,0" VerticalAlignment="Top" Checked="CheckBox_UserIdleDetectionDisabled_Checked" Unchecked="CheckBox_UserIdleDetectionDisabled_Unchecked"/>
+            <CheckBox x:Name="CheckBox_AppIdleDetectionDisabled" Content="Disable Application Idle Detection" HorizontalAlignment="Left" Margin="29,305,0,0" VerticalAlignment="Top" Checked="CheckBox_AppIdleDetectionDisabled_Checked" Unchecked="CheckBox_AppIdleDetectionDisabled_Unchecked"/>
+            <TextBlock x:Name="TextBlock_Session_Expires" HorizontalAlignment="Left" Margin="45,440,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="30" Width="274"/>
+            <TextBlock x:Name="SessionExpiresLabel" HorizontalAlignment="Left" Margin="45,407,0,0" TextWrapping="Wrap" Text="Session Expires:" VerticalAlignment="Top" Height="46" Width="323"/>
         </Grid>
     </Grid>
 

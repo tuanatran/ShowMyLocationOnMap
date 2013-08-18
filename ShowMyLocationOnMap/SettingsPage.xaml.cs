@@ -8,133 +8,227 @@ using Microsoft.Live;
 using Microsoft.Live.Controls;
 using System.Text;
 using Microsoft.Phone.Shell;
+using System.Windows.Data;
+using System.ComponentModel;
+using System.Windows.Controls;
 
 namespace ShowMyLocationOnMap
 {
     public partial class SettingsPage : PhoneApplicationPage
     {
         private MobileServiceAuthenticationProvider authType = SettingsContainer.AuthType.Value;
-        private LiveAuthClient _authClient = new LiveAuthClient(App.APP_AUTHKEY_LIVECONNECT);
+        private LiveAuthClient _authClient = App.AuthClient;
         private LiveConnectClient _client;
         private LiveConnectSession _session;
-        private bool retry = false;
+        public static MyData settings;
 
         public SettingsPage()
         {
             InitializeComponent();
-            Loaded += OnLoaded;
+            Loaded += SettingsPage_Loaded;
         }
 
-        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
+        public class MyData : INotifyPropertyChanged
         {
-            CheckBox_LocationService.IsChecked = SettingsContainer.LocationConsent.Value;
-            CheckBox_DisableUserIdle.IsChecked = SettingsContainer.DisableUserIdleDetection.Value;
-            CheckBox_DisableAppIdle.IsChecked = SettingsContainer.DisableApplicationIdleDetection.Value;
-            if (CheckBox_DisableAppIdle.IsChecked.Value)
+            private string myDataProperty;
+            private bool userIdleDetectionCheckBoxEnabled;
+            private bool appIdleDetectionCheckBoxEnabled;
+
+            public MyData() { }
+
+            public MyData(DateTime dateTime)
             {
-                CheckBox_DisableAppIdle.IsEnabled = false;
+                myDataProperty = "Last bound time was " + dateTime.ToLongTimeString();
             }
-            SetLocationConsent();
-            // only force set this when user first signs into the app
-            // it is optional so leave user setting until user signs out
-            if (String.IsNullOrEmpty(SettingsContainer.LiveConnectToken.Value))
+
+            public DateTime SessionExpires
             {
-                SetUserIdleDetection();
+                get { return SettingsContainer.SessionExpires.Value; }
+                set
+                {
+                    SettingsContainer.SessionExpires.Value = value;
+                    OnPropertyChanged("SessionExpires");
+                }
             }
-        }
 
-        private void Refresh()
-        {
-            NavigationService.Navigate(new Uri("/SettingsPage.xaml?" + DateTime.Now.Ticks, UriKind.Relative));
-        }
-
-        private void SetApplicationIdleDetection()
-        {
-            StringBuilder msgText = new StringBuilder();
-            msgText.Append("It is recommended that you disable Application Idle detection. If this is not done, the application ");
-            msgText.Append("will not run when the lock screen is engaged. When this is disabled, it will remain disabled until ");
-            msgText.Append("your current session ends. Would you like to diable application idle detection now?");
-            MessageBoxResult result = MessageBox.Show(msgText.ToString(), "ApplicationIdleDetectionMode", MessageBoxButton.OKCancel);
-            if (result == MessageBoxResult.OK)
+            public bool LocationConsent
             {
-                PhoneApplicationService.Current.ApplicationIdleDetectionMode = IdleDetectionMode.Disabled;
-                SettingsContainer.DisableApplicationIdleDetection.Value = true;
-                CheckBox_DisableAppIdle.IsChecked = true;
-                CheckBox_DisableAppIdle.IsEnabled = false;
+                get { return SettingsContainer.LocationConsent.Value; }
+                set
+                {
+                    SettingsContainer.LocationConsent.Value = value;
+                    OnPropertyChanged("LocationConsent");
+                    SetLocationConsent(value);
+                }
+            }
+
+            public bool UserIdleDetectionDisabled
+            {
+                get { return SettingsContainer.DisableUserIdleDetection.Value; }
+                set
+                {
+                    OnPropertyChanged("UserIdleDetectionDisabled");
+                    SetUserIdleDetection(value);
+                }
+            }
+
+            public bool UserIdleDetectionDisabledCheckBoxEnabled
+            {
+                get { return PhoneApplicationService.Current.UserIdleDetectionMode != IdleDetectionMode.Disabled; }
+                set
+                {
+                    userIdleDetectionCheckBoxEnabled = value;
+                    OnPropertyChanged("UserIdleDetectionDisabledCheckBoxEnabled");
+                }
+            }
+
+            public bool AppIdleDetectionDisabled
+            {
+                get
+                {
+                    return SettingsContainer.DisableApplicationIdleDetection.Value;
+                }
+                set
+                {
+                    SettingsContainer.DisableApplicationIdleDetection.Value = value;
+                    OnPropertyChanged("AppIdleDetectionDisabled");
+                    SetApplicationIdleDetection(value);
+                }
+            }
+
+            public bool AppIdleDetectionCheckBoxEnabled
+            {
+                get { return PhoneApplicationService.Current.ApplicationIdleDetectionMode != IdleDetectionMode.Disabled; }
+                set
+                {
+                    appIdleDetectionCheckBoxEnabled = value;
+                    OnPropertyChanged("AppIdleDetectionCheckBoxEnabled");
+                }
+            }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            private void OnPropertyChanged(string propertyName)
+            {
+                PropertyChangedEventHandler handler = PropertyChanged;
+                if (handler != null)
+                {
+                    handler(this, new PropertyChangedEventArgs(propertyName));
+                }
             }
         }
 
-        private void SetUserIdleDetection()
+
+        private static void SetUserIdleDetection(bool option)
         {
-            if (!SettingsContainer.DisableUserIdleDetection.Value)
+            if (!option)
             {
                 StringBuilder msgText = new StringBuilder();
-                msgText.Append("This app is intended to be run while being charged. Disabling application ");
-                msgText.Append("idle detection will ensure that the screen does not turn off while navigating. ");
+                msgText.Append("This app is intended to be run while being charged. Disabling User ");
+                msgText.Append("Idle detection will ensure that the screen does not turn off while navigating. ");
                 msgText.Append("Detection will be disabled only while this app is running, but you can manually enable ");
                 msgText.Append("it from the Settings page.");
-                MessageBox.Show(msgText.ToString());
-                PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Disabled;
-                SettingsContainer.DisableUserIdleDetection.Value = true;
-                CheckBox_DisableUserIdle.IsChecked = true;
-                Refresh();
+                MessageBoxResult result = MessageBox.Show(msgText.ToString(), "UserIdleDetectionMode", MessageBoxButton.OKCancel);
+                if (result == MessageBoxResult.OK)
+                {
+                    option = true;
+                    PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Disabled;
+                    settings.AppIdleDetectionDisabled = option;
+                }
             }
             else
             {
-                SettingsContainer.DisableUserIdleDetection.Value = false;
                 PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Enabled;
-                CheckBox_DisableUserIdle.IsChecked = false;
             }
         }
 
-        private void SetLocationConsent()
+        private static void SetApplicationIdleDetection(bool option)
         {
+            if (!option)
+            {
+                StringBuilder msgText = new StringBuilder();
+                msgText.Append("It is recommended that you also disable Application Idle detection. If this is not done, the application ");
+                msgText.Append("will not run when the lock screen is engaged. When this is disabled, it will remain disabled until ");
+                msgText.Append("your current session ends. Would you like to disable application idle detection now?");
+                MessageBox.Show(msgText.ToString(), "ApplicationIdleDetectionMode", MessageBoxButton.OK);
+                PhoneApplicationService.Current.ApplicationIdleDetectionMode = IdleDetectionMode.Disabled;
+            }
+        }
+
+        private static void SetLocationConsent(bool option)
+        {
+            bool consent = option;
             // User must give location service consent for app to function
-            while (!SettingsContainer.LocationConsent.Value)
+            // User has not opted in for Location
+            if (!option)
             {
-                // User has not opted in for Location
-                GetLocationConsent(retry);
-            }
-        }
-
-        private void GetLocationConsent(bool retry)
-        {
-            MessageBoxResult result = MessageBox.Show("This app accesses your phone's location. Is that ok?", 
-                "Location", MessageBoxButton.OKCancel);
-
-            if (result == MessageBoxResult.OK)
-            {
-                SettingsContainer.LocationConsent.Value = true;                
-            }
-            else
-            {
-                if (!retry)
+                MessageBoxResult result = MessageBox.Show("This app accesses your phone's location. Is that ok?", "Location", MessageBoxButton.OKCancel);
+                if (result == MessageBoxResult.OK)
+                {
+                    consent = true;
+                }
+                else
                 {
                     result = MessageBox.
-                        Show("This app will not function without your location. Press 'ok' to provide consent or 'cancel' to close.", 
+                        Show("This app will not function without your location. Press 'ok' to provide consent or 'cancel' to close.",
                         "Location", MessageBoxButton.OKCancel);
 
                     if (result == MessageBoxResult.OK)
                     {
-                        SettingsContainer.LocationConsent.Value = true;
-                        Refresh();
+                        consent = true;
+                        settings.LocationConsent = consent;
                     }
                     else
                     {
                         MessageBox.Show("This app will now close.");
+                        settings.LocationConsent = consent;
                         Application.Current.Terminate();
                     }
                 }
             }
         }
 
-        private async void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
+        private void SettingsPage_Loaded (object sender, RoutedEventArgs routedEventArgs)
+        { 
+            LoadData();
+        }
+
+        private void LoadData()
         {
-            bool loginTask = await AttemptLogin(authType);
-            if (!loginTask)
-            {
-                MessageBox.Show("Login failed. ");
-            }
+            settings = new MyData();
+            settings.LocationConsent = SettingsContainer.LocationConsent.Value;
+            settings.UserIdleDetectionDisabled = (PhoneApplicationService.Current.UserIdleDetectionMode == IdleDetectionMode.Disabled);
+            settings.AppIdleDetectionDisabled = (PhoneApplicationService.Current.ApplicationIdleDetectionMode == IdleDetectionMode.Disabled);
+            settings.SessionExpires = SettingsContainer.SessionExpires.Value;
+            Binding locationConsentBinding = new Binding("LocationConsent");
+            locationConsentBinding.Mode = BindingMode.TwoWay;
+            locationConsentBinding.Source = settings;
+            CheckBox_LocationService.SetBinding(CheckBox.IsCheckedProperty, locationConsentBinding);
+            Binding userIdleDetectionDisabledBinding = new Binding("UserIdleDetectionDisabled");
+            userIdleDetectionDisabledBinding.Mode = BindingMode.TwoWay;
+            userIdleDetectionDisabledBinding.Source = settings;
+            CheckBox_UserIdleDetectionDisabled.SetBinding(CheckBox.IsCheckedProperty, userIdleDetectionDisabledBinding);
+            Binding appIdleDetectionDisabledBinding = new Binding("AppIdleDetectionDisabled");
+            appIdleDetectionDisabledBinding.Mode = BindingMode.TwoWay;
+            appIdleDetectionDisabledBinding.Source = settings;
+            CheckBox_AppIdleDetectionDisabled.SetBinding(CheckBox.IsCheckedProperty, appIdleDetectionDisabledBinding);
+            Binding sessionExpiresBinding = new Binding("SessionExpires");
+            sessionExpiresBinding.Mode = BindingMode.OneWay;
+            sessionExpiresBinding.Source = settings;
+            TextBlock_Session_Expires.SetBinding(TextBlock.TextProperty, sessionExpiresBinding);
+            this.DataContext = settings;
+        }
+
+        private void LockControls()
+        {
+            Binding userIdleDetectionCheckBoxEnabledBinding = new Binding("UserIdleDetectionCheckBoxEnabled");
+            userIdleDetectionCheckBoxEnabledBinding.Mode = BindingMode.TwoWay;
+            userIdleDetectionCheckBoxEnabledBinding.Source = settings;
+            CheckBox_UserIdleDetectionDisabled.SetBinding(CheckBox.IsEnabledProperty, userIdleDetectionCheckBoxEnabledBinding);
+            Binding appIdleDetectionCheckBoxEnabledBinding = new Binding("AppIdleDetectionCheckBoxEnabled");
+            appIdleDetectionCheckBoxEnabledBinding.Mode = BindingMode.TwoWay;
+            appIdleDetectionCheckBoxEnabledBinding.Source = settings;
+            CheckBox_AppIdleDetectionDisabled.SetBinding(CheckBox.IsEnabledProperty, appIdleDetectionCheckBoxEnabledBinding);
         }
 
         private void btnSignin_SessionChanged(object sender, LiveConnectSessionChangedEventArgs e)
@@ -152,102 +246,109 @@ namespace ShowMyLocationOnMap
             }
         }
 
-
-        public async Task<bool> AttemptLogin(MobileServiceAuthenticationProvider authType)
+        private async Task Authenticate (MobileServiceAuthenticationProvider authType)
         {
-            try
+            while (App.CurrentUser == null)
             {
-                if (authType.GetType() == typeof(MobileServiceAuthenticationProvider))
+                try
                 {
-                    if (String.IsNullOrEmpty(SettingsContainer.LiveConnectToken.Value) && App.CurrentUser == null)
+                    if (authType.GetType() == typeof(MobileServiceAuthenticationProvider))
                     {
-                        App.CurrentUser = await App.MobileService.LoginAsync(MobileServiceAuthenticationProvider.MicrosoftAccount);
-                    }
-                    try
-                    {
-                        LiveLoginResult initializeResult = await _authClient.InitializeAsync();
-                        if (initializeResult.Status == LiveConnectSessionStatus.Connected)
+                        if (String.IsNullOrEmpty(SettingsContainer.LiveConnectToken.Value) && App.CurrentUser == null)
                         {
-                            _session = _authClient.Session;
-                        }
-                        else
-                        {
-                            LiveLoginResult loginResult = await _authClient.LoginAsync(
-                                new[] { "wl.signin", "wl.basic", "wl.offline_access" });
-                            if (loginResult.Status == LiveConnectSessionStatus.Connected)
-                            {
-                                _session = _authClient.Session;
-                            }
+                            App.CurrentUser = await App.MobileService.LoginAsync(MobileServiceAuthenticationProvider.MicrosoftAccount);
                         }
                         try
                         {
-                            _client = new LiveConnectClient(_session);
-                            LiveOperationResult operationResult = await _client.GetAsync("me");
-                            dynamic result = operationResult.Result;
-                            if (result != null)
+                            LiveLoginResult initializeResult = await _authClient.InitializeAsync();
+                            if (initializeResult.Status == LiveConnectSessionStatus.Connected)
                             {
-                                this.infoTextBlock.Text = string.Join(" ", "Hello", result.name, "!");
+                                _session = _authClient.Session;
+                                settings.SessionExpires = DateTime.UtcNow.Add(_session.Expires.Offset);
                             }
                             else
                             {
-                                this.infoTextBlock.Text = "Error getting name.";
+                                LiveLoginResult loginResult = await _authClient.LoginAsync(
+                                    new[] { "wl.signin", "wl.basic", "wl.offline_access" });
+                                if (loginResult.Status == LiveConnectSessionStatus.Connected)
+                                {
+                                    _session = _authClient.Session;
+                                    settings.SessionExpires = DateTime.UtcNow.Add(_session.Expires.Offset);
+                                }
                             }
-                            App.CurrentUser = await App.MobileService.LoginWithMicrosoftAccountAsync(_session.AuthenticationToken);
-                            SettingsContainer.LiveConnectToken.Value = _session.AuthenticationToken;
-                            SettingsContainer.SessionExpires.Value = DateTime.UtcNow.Add(_session.Expires.Offset);
+                            try
+                            {
+                                _client = new LiveConnectClient(_session);
+                                LiveOperationResult operationResult = await _client.GetAsync("me");
+                                dynamic result = operationResult.Result;
+                                if (result != null)
+                                {
+                                    this.infoTextBlock.Text = string.Join(" ", "Hello", result.name, "!");
+                                }
+                                else
+                                {
+                                    this.infoTextBlock.Text = "Error getting name.";
+                                }
+                                App.CurrentUser = await App.MobileService.LoginWithMicrosoftAccountAsync(_session.AuthenticationToken);
+                                SettingsContainer.LiveConnectToken.Value = _session.AuthenticationToken;
+                            }
+                            catch (LiveAuthException exception)
+                            {
+                                this.infoTextBlock.Text = "Error signing in: " + exception.Message;
+                            }
+                            catch (LiveConnectException exception)
+                            {
+                                this.infoTextBlock.Text = "Error calling API: " + exception.Message;
+                            }
                         }
                         catch (LiveAuthException exception)
                         {
-                            this.infoTextBlock.Text = "Error signing in: " + exception.Message;
+                            this.infoTextBlock.Text = "Error initializing: " + exception.Message;
                         }
-                        catch (LiveConnectException exception)
-                        {
-                            this.infoTextBlock.Text = "Error calling API: " + exception.Message;
-                        }
-                    }
-                    catch (LiveAuthException exception)
-                    {
-                        this.infoTextBlock.Text = "Error initializing: " + exception.Message;
                     }
                 }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                SettingsContainer.LiveConnectToken.Value = String.Empty;
-                StringBuilder message = new StringBuilder("An exception of type ");
-                message.Append(ex.GetType()).Append(" from source ").Append(ex.Source).Append(" occurred: ").Append(ex.Message);
-                MessageBox.Show(message.ToString());
-                return false;
+                catch (Exception ex)
+                {
+                    SettingsContainer.LiveConnectToken.Value = String.Empty;
+                    StringBuilder message = new StringBuilder("An exception of type ");
+                    message.Append(ex.GetType()).Append(" from source ").Append(ex.Source).Append(" occurred: ").Append(ex.Message);
+                    MessageBox.Show(message.ToString());
+                }
             }
         }
 
-        private void CheckBox_LocationService_Unchecked(object sender, RoutedEventArgs e)
+        protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
-            SettingsContainer.LocationConsent.Value = false;
-            retry = false;
-            SetLocationConsent();
+            base.OnNavigatedTo(e);
+            await Authenticate(authType);
+            if (e.NavigationMode != NavigationMode.New)
+            {
+                LockControls();
+            }
         }
 
         private void CheckBox_LocationService_Checked(object sender, RoutedEventArgs e)
         {
-            SettingsContainer.LocationConsent.Value = true;
-            Refresh();
         }
 
-        private void CheckBox_DisableAppIdle_Checked(object sender, RoutedEventArgs e)
+        private void CheckBox_UserIdleDetectionDisabled_Checked(object sender, RoutedEventArgs e)
         {
-            SetApplicationIdleDetection();
         }
 
-        private void CheckBox_DisableUserIdle_Checked(object sender, RoutedEventArgs e)
+        private void CheckBox_AppIdleDetectionDisabled_Checked(object sender, RoutedEventArgs e)
         {
-            SetUserIdleDetection();
         }
 
-        private void CheckBox_DisableUserIdle_Unchecked(object sender, RoutedEventArgs e)
+        private void CheckBox_UserIdleDetectionDisabled_Unchecked(object sender, RoutedEventArgs e)
         {
-            SetUserIdleDetection();
+        }
+
+        private void CheckBox_LocationService_Unchecked(object sender, RoutedEventArgs e)
+        {
+        }
+
+        private void CheckBox_AppIdleDetectionDisabled_Unchecked(object sender, RoutedEventArgs e)
+        {
         }
     }
 }

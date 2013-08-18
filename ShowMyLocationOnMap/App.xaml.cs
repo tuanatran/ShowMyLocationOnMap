@@ -8,6 +8,7 @@ using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 using ShowMyLocationOnMap.Resources;
 using Microsoft.WindowsAzure.MobileServices;
+using Microsoft.Live;
 
 namespace ShowMyLocationOnMap
 {
@@ -18,15 +19,16 @@ namespace ShowMyLocationOnMap
         /// </summary>
         /// <returns>The root frame of the Phone Application.</returns>
         public static PhoneApplicationFrame RootFrame { get; private set; }
-
         public static MobileServiceClient MobileService = new MobileServiceClient(
-            "https://routewatch.azure-mobile.net/",
-            "LgBaABUxSgYxejSarTfjPzrnuSOxPt29"
+            APPLICATION_URL,
+            APPLICATION_KEY
         );
-
+        public static LiveAuthClient AuthClient = new LiveAuthClient(APP_AUTHKEY_LIVECONNECT);
         public static MobileServiceUser CurrentUser { get; set; }
 
-        public static string APP_AUTHKEY_LIVECONNECT = "00000000440FDE10";
+        private const string APP_AUTHKEY_LIVECONNECT = "00000000440FDE10";
+        private const string APPLICATION_URL = "https://routewatch.azure-mobile.net/";
+        private const string APPLICATION_KEY = "LgBaABUxSgYxejSarTfjPzrnuSOxPt29";
 
         /// <summary>
         /// Constructor for the Application object.
@@ -89,7 +91,6 @@ namespace ShowMyLocationOnMap
         // This code will not execute when the application is deactivated
         private void Application_Closing(object sender, ClosingEventArgs e)
         {
-            SettingsContainer.DisableApplicationIdleDetection.Value = false;
         }
 
         // Code to execute if a navigation fails

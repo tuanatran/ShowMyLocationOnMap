@@ -12,8 +12,6 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>This client library enables client applications to connect to Windows Azure Mobile Services. Mobile Services allows you to develop an app with a scalable and secure backend hosted in Windows Azure. You can incorporate structured storage, user authentication and push notifications in minutes. For more information, check out https://www.windowsazure.com/mobile.</description>
     <summary>Windows Azure Mobile Services SDK.</summary>
-    <releaseNotes />
-    <copyright />
     <language>en-US</language>
     <tags>microsoft windows azure mobile services windowsazureofficial</tags>
     <dependencies>

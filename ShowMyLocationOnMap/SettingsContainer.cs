@@ -23,8 +23,6 @@ namespace ShowMyLocationOnMap
         // set the default settings
         // the IsolatedStorageProperty will set properties if they do not exist
         /// </summary>
-
-        // Keeps the first login time
         public static readonly IsolatedStorageProperty<DateTime> SessionExpires =
             new IsolatedStorageProperty<DateTime>(SETTINGS_OPTIONS.SessionExpires.ToString(), DateTime.Now);
         public static readonly IsolatedStorageProperty<bool> LocationConsent =
