@@ -1,6 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
+using Microsoft.Phone.Shell;
+using ShowMyLocationOnMap.Resources;
 using Microsoft.Phone.Maps.Controls;
 using System.Device.Location; // Provides the GeoCoordinate class.
 using Windows.Devices.Geolocation; //Provides the Geocoordinate class.
@@ -10,6 +17,9 @@ using System.IO.IsolatedStorage;
 using Microsoft.Phone.Tasks;
 using Microsoft.WindowsAzure.MobileServices;
 using Newtonsoft.Json;
+
+
+
 
 namespace ShowMyLocationOnMap
 {
@@ -43,14 +53,31 @@ namespace ShowMyLocationOnMap
 
         Geolocator geolocator = null;
         bool tracking = false;
+        const int MIN_ZOOM_LEVEL = 1;
+        const int MAX_ZOOM_LEVEL = 20;
+        const int MIN_ZOOMLEVEL_FOR_LANDMARKS = 16;
+
+        ToggleStatus locationToggleStatus = ToggleStatus.ToggledOff;
+        ToggleStatus landmarksToggleStatus = ToggleStatus.ToggledOff;
+        GeoCoordinate currentLocation = null;
+        MapLayer locationLayer = null;
 
         // Constructor
         public MainPage()
         {
             InitializeComponent();
-            this.Loaded += MainPage_Loaded;
-            ShowMyLocationOnTheMap();
+            //this.Loaded += MainPage_Loaded;
+            //ShowMyLocationOnTheMap();
+
+            // Create the localized ApplicationBar.
+            BuildLocalizedApplicationBar();
+            //ShowMyLocationOnTheMap();
+
+            // Get current location.
+            GetLocation();
         }
+
+       
 
         private async void ShowMyLocationOnTheMap()
         {
@@ -85,6 +112,9 @@ namespace ShowMyLocationOnMap
             // Add the MapLayer to the Map.
             mapWithMyLocation.Layers.Add(myLocationLayer);
         }
+        
+
+       
 
         private void Route_Click(object sender, RoutedEventArgs e)
         {
@@ -147,11 +177,11 @@ namespace ShowMyLocationOnMap
 
         private void TrackLocationButton_Click(object sender, RoutedEventArgs e)
         {
-            if ((bool)IsolatedStorageSettings.ApplicationSettings["LocationConsent"] != true)
+            /*if ((bool)IsolatedStorageSettings.ApplicationSettings["LocationConsent"] != true)
             {
                 // The user has opted out of Location.
                 return;
-            }
+            }*/
 
             if (!tracking)
             {
@@ -179,6 +209,159 @@ namespace ShowMyLocationOnMap
 
         void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
+        }
+
+        #region Event handlers for App Bar buttons and menu items
+
+        void ToggleLocation(object sender, EventArgs e)
+        {
+            switch (locationToggleStatus)
+            {
+                case ToggleStatus.ToggledOff:
+                    ShowLocation();
+                    CenterMapOnLocation();
+                    locationToggleStatus = ToggleStatus.ToggledOn;
+                    break;
+                case ToggleStatus.ToggledOn:
+                    this.mapWithMyLocation.Layers.Remove(locationLayer);
+                    locationLayer = null;
+                    locationToggleStatus = ToggleStatus.ToggledOff;
+                    break;
+            }
+        }
+
+        void ToggleLandmarks(object sender, EventArgs e)
+        {
+            switch (landmarksToggleStatus)
+            {
+                case ToggleStatus.ToggledOff:
+                    this.mapWithMyLocation.LandmarksEnabled = true;
+                    if (this.mapWithMyLocation.ZoomLevel < MIN_ZOOMLEVEL_FOR_LANDMARKS)
+                    {
+                        this.mapWithMyLocation.ZoomLevel = MIN_ZOOMLEVEL_FOR_LANDMARKS;
+                    }
+                    landmarksToggleStatus = ToggleStatus.ToggledOn;
+                    break;
+                case ToggleStatus.ToggledOn:
+                    this.mapWithMyLocation.LandmarksEnabled = false;
+                    landmarksToggleStatus = ToggleStatus.ToggledOff;
+                    break;
+            }
+
+        }
+
+        void ZoomIn(object sender, EventArgs e)
+        {
+            if (this.mapWithMyLocation.ZoomLevel < MAX_ZOOM_LEVEL)
+            {
+                this.mapWithMyLocation.ZoomLevel++;
+            }
+        }
+
+        void ZoomOut(object sender, EventArgs e)
+        {
+            if (this.mapWithMyLocation.ZoomLevel > MIN_ZOOM_LEVEL)
+            {
+                this.mapWithMyLocation.ZoomLevel--;
+            }
+        }
+
+        #endregion
+
+        #region Helper functions for App Bar button and menu item event handlers
+
+        private void ShowLocation()
+        {
+            // Cr*eate a small circle to mark the current location.
+            Ellipse myCircle = new Ellipse();
+            myCircle.Fill = new SolidColorBrush(Colors.Blue);
+            myCircle.Height = 20;
+            myCircle.Width = 20;
+            myCircle.Opacity = 50;
+
+            // Create a MapOverlay to contain the circle.
+            MapOverlay myLocationOverlay = new MapOverlay();
+            myLocationOverlay.Content = myCircle;
+            myLocationOverlay.PositionOrigin = new Point(0.5, 0.5);
+            myLocationOverlay.GeoCoordinate = currentLocation;
+
+            // Create a MapLayer to contain the MapOverlay.
+            locationLayer = new MapLayer();
+            locationLayer.Add(myLocationOverlay);
+
+            // Add the MapLayer to the Map.
+            this.mapWithMyLocation.Layers.Add(locationLayer);
+
+        }
+
+        private async void GetLocation()
+        {
+            // Get current location.
+            Geolocator myGeolocator = new Geolocator();
+            Geoposition myGeoposition = await myGeolocator.GetGeopositionAsync();
+            Geocoordinate myGeocoordinate = myGeoposition.Coordinate;
+            currentLocation = CoordinateConverter.ConvertGeocoordinate(myGeocoordinate);
+        }
+
+        private void CenterMapOnLocation()
+        {
+            this.mapWithMyLocation.Center = currentLocation;
+        }
+
+        #endregion
+
+        // Create the localized ApplicationBar.
+        private void BuildLocalizedApplicationBar()
+        {
+            // Set the page's ApplicationBar to a new instance of ApplicationBar.
+            ApplicationBar = new ApplicationBar();
+            ApplicationBar.Opacity = 0.5;
+
+            // Create buttons with localized strings from AppResources.
+            // Toggle Location button.
+            ApplicationBarIconButton appBarButton = new ApplicationBarIconButton(new Uri("/Assets/AppBar/location.png", UriKind.Relative));
+            appBarButton.Text = AppResources.AppBarToggleLocationButtonText;
+            appBarButton.Click += ToggleLocation;
+            ApplicationBar.Buttons.Add(appBarButton);
+            // Toggle Landmarks button.
+            appBarButton = new ApplicationBarIconButton(new Uri("/Assets/AppBar/landmarks.png", UriKind.Relative));
+            appBarButton.Text = AppResources.AppBarToggleLandmarksButtonText;
+            appBarButton.Click += ToggleLandmarks;
+            ApplicationBar.Buttons.Add(appBarButton);
+            // Zoom In button.
+            appBarButton = new ApplicationBarIconButton(new Uri("/Assets/AppBar/zoomin.png", UriKind.Relative));
+            appBarButton.Text = AppResources.AppBarZoomInButtonText;
+            appBarButton.Click += ZoomIn;
+            ApplicationBar.Buttons.Add(appBarButton);
+            // Zoom Out button.
+            appBarButton = new ApplicationBarIconButton(new Uri("/Assets/AppBar/zoomout.png", UriKind.Relative));
+            appBarButton.Text = AppResources.AppBarZoomOutButtonText;
+            appBarButton.Click += ZoomOut;
+            ApplicationBar.Buttons.Add(appBarButton);
+
+            // Create menu items with localized strings from AppResources.
+            // Toggle Location menu item.
+            ApplicationBarMenuItem appBarMenuItem = new ApplicationBarMenuItem(AppResources.AppBarToggleLocationMenuItemText);
+            appBarMenuItem.Click += ToggleLocation;
+            ApplicationBar.MenuItems.Add(appBarMenuItem);
+            // Toggle Landmarks menu item.
+            appBarMenuItem = new ApplicationBarMenuItem(AppResources.AppBarToggleLandmarksMenuItemText);
+            appBarMenuItem.Click += ToggleLandmarks;
+            ApplicationBar.MenuItems.Add(appBarMenuItem);
+            // Zoom In menu item.
+            appBarMenuItem = new ApplicationBarMenuItem(AppResources.AppBarZoomInMenuItemText);
+            appBarMenuItem.Click += ZoomIn;
+            ApplicationBar.MenuItems.Add(appBarMenuItem);
+            // Zoom Out menu item.
+            appBarMenuItem = new ApplicationBarMenuItem(AppResources.AppBarZoomOutMenuItemText);
+            appBarMenuItem.Click += ZoomOut;
+            ApplicationBar.MenuItems.Add(appBarMenuItem);
+        }
+
+        private enum ToggleStatus
+        {
+            ToggledOff,
+            ToggledOn
         }
     }
 }
