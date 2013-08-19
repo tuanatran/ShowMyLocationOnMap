@@ -134,4 +134,28 @@
   <data name="AppBarMenuItemText" xml:space="preserve">
     <value>Menu Item</value>
   </data>
+  <data name="AppBarToggleLandmarksButtonText" xml:space="preserve">
+    <value>landmarks</value>
+  </data>
+  <data name="AppBarToggleLandmarksMenuItemText" xml:space="preserve">
+    <value>toggle landmarks</value>
+  </data>
+  <data name="AppBarToggleLocationButtonText" xml:space="preserve">
+    <value>location</value>
+  </data>
+  <data name="AppBarZoomInButtonText" xml:space="preserve">
+    <value>zoom in</value>
+  </data>
+  <data name="AppBarZoomInMenuItemText" xml:space="preserve">
+    <value>zoom in</value>
+  </data>
+  <data name="AppBarZoomOutButtonText" xml:space="preserve">
+    <value>zoom out</value>
+  </data>
+  <data name="AppBarZoomOutMenuItemText" xml:space="preserve">
+    <value>zoom out</value>
+  </data>
+  <data name="AppBarToggleLocationMenuItemText" xml:space="preserve">
+    <value>toggle location</value>
+  </data>
 </root>
