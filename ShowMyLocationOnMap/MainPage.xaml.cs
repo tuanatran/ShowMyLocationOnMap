@@ -16,10 +16,21 @@ namespace ShowMyLocationOnMap
     public partial class MainPage : PhoneApplicationPage
     {
 
-        //private MobileServiceCollection<DriverDelivery, DriverDelivery> items;
-        private IMobileServiceTable<DriverDelivery> todoTable = App.MobileService.GetTable<DriverDelivery>();
+        private MobileServiceCollection<DeliveryRoute, DeliveryRoute> deliveries;
+        private IMobileServiceTable<DeliveryRoute> deliveryTable = App.MobileService.GetTable<DeliveryRoute>();
 
-        public class DriverDelivery
+        public class DeliveryRoute
+        {
+            public int Id { get; set; }
+
+            [JsonProperty(PropertyName = "destinationPoints")]
+            public DoubleCollection[] DestinationPoints { get; set; }
+
+            [JsonProperty(PropertyName = "driver")]
+            public int Driver { get; set; }
+        }
+
+        public class Driver
         {
             public int Id { get; set; }
 
@@ -28,12 +39,6 @@ namespace ShowMyLocationOnMap
 
             [JsonProperty(PropertyName = "lastName")]
             public string LastName { get; set; }
-
-            [JsonProperty(PropertyName = "completedDeliveries")]
-            public int CompletedDeliveries { get; set; }
-
-            [JsonProperty(PropertyName = "totalDeliveries")]
-            public int TotalDeliveries { get; set; }
         }
 
         Geolocator geolocator = null;

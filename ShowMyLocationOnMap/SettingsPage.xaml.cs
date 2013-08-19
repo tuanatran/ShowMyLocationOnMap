@@ -21,10 +21,12 @@ namespace ShowMyLocationOnMap
         private LiveConnectClient _client;
         private LiveConnectSession _session;
         public static MyData settings;
+        public static bool consent = false;
 
         public SettingsPage()
         {
             InitializeComponent();
+            LoadData();
             Loaded += SettingsPage_Loaded;
         }
 
@@ -67,6 +69,7 @@ namespace ShowMyLocationOnMap
                 get { return SettingsContainer.DisableUserIdleDetection.Value; }
                 set
                 {
+                    SettingsContainer.DisableUserIdleDetection.Value = value;
                     OnPropertyChanged("UserIdleDetectionDisabled");
                     SetUserIdleDetection(value);
                 }
@@ -131,14 +134,18 @@ namespace ShowMyLocationOnMap
                 MessageBoxResult result = MessageBox.Show(msgText.ToString(), "UserIdleDetectionMode", MessageBoxButton.OKCancel);
                 if (result == MessageBoxResult.OK)
                 {
-                    option = true;
+                    consent = true;
                     PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Disabled;
-                    settings.AppIdleDetectionDisabled = option;
+                    settings.UserIdleDetectionDisabled = true;
                 }
             }
             else
             {
-                PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Enabled;
+                if (!consent)
+                {
+                    PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Enabled;
+                    settings.UserIdleDetectionDisabled = false;
+                }
             }
         }
 
@@ -152,12 +159,13 @@ namespace ShowMyLocationOnMap
                 msgText.Append("your current session ends. Would you like to disable application idle detection now?");
                 MessageBox.Show(msgText.ToString(), "ApplicationIdleDetectionMode", MessageBoxButton.OK);
                 PhoneApplicationService.Current.ApplicationIdleDetectionMode = IdleDetectionMode.Disabled;
+                settings.AppIdleDetectionDisabled = true;
             }
         }
 
         private static void SetLocationConsent(bool option)
         {
-            bool consent = option;
+            consent = false;
             // User must give location service consent for app to function
             // User has not opted in for Location
             if (!option)
@@ -188,9 +196,9 @@ namespace ShowMyLocationOnMap
             }
         }
 
-        private void SettingsPage_Loaded (object sender, RoutedEventArgs routedEventArgs)
-        { 
-            LoadData();
+        private async void SettingsPage_Loaded (object sender, RoutedEventArgs routedEventArgs)
+        {
+            await Authenticate(authType);
         }
 
         private void LoadData()
@@ -216,7 +224,7 @@ namespace ShowMyLocationOnMap
             sessionExpiresBinding.Mode = BindingMode.OneWay;
             sessionExpiresBinding.Source = settings;
             TextBlock_Session_Expires.SetBinding(TextBlock.TextProperty, sessionExpiresBinding);
-            this.DataContext = settings;
+            LockControls();
         }
 
         private void LockControls()
@@ -229,6 +237,7 @@ namespace ShowMyLocationOnMap
             appIdleDetectionCheckBoxEnabledBinding.Mode = BindingMode.TwoWay;
             appIdleDetectionCheckBoxEnabledBinding.Source = settings;
             CheckBox_AppIdleDetectionDisabled.SetBinding(CheckBox.IsEnabledProperty, appIdleDetectionCheckBoxEnabledBinding);
+            this.DataContext = settings;
         }
 
         private void btnSignin_SessionChanged(object sender, LiveConnectSessionChangedEventArgs e)
@@ -315,40 +324,6 @@ namespace ShowMyLocationOnMap
                     MessageBox.Show(message.ToString());
                 }
             }
-        }
-
-        protected async override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-            await Authenticate(authType);
-            if (e.NavigationMode != NavigationMode.New)
-            {
-                LockControls();
-            }
-        }
-
-        private void CheckBox_LocationService_Checked(object sender, RoutedEventArgs e)
-        {
-        }
-
-        private void CheckBox_UserIdleDetectionDisabled_Checked(object sender, RoutedEventArgs e)
-        {
-        }
-
-        private void CheckBox_AppIdleDetectionDisabled_Checked(object sender, RoutedEventArgs e)
-        {
-        }
-
-        private void CheckBox_UserIdleDetectionDisabled_Unchecked(object sender, RoutedEventArgs e)
-        {
-        }
-
-        private void CheckBox_LocationService_Unchecked(object sender, RoutedEventArgs e)
-        {
-        }
-
-        private void CheckBox_AppIdleDetectionDisabled_Unchecked(object sender, RoutedEventArgs e)
-        {
         }
     }
 }

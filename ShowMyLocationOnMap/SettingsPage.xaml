@@ -1,38 +1,51 @@
 ﻿<phone:PhoneApplicationPage
-    x:Class="ShowMyLocationOnMap.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:my="clr-namespace:Microsoft.Live.Controls;assembly=Microsoft.Live.Controls" xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" xmlns:ec="clr-namespace:Microsoft.Expression.Interactivity.Core;assembly=Microsoft.Expression.Interactions"
+    x:Class="ShowMyLocationOnMap.SettingsPage"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait" Orientation="Portrait"
     mc:Ignorable="d"
-     shell:SystemTray.IsVisible="True" xmlns:my="clr-namespace:Microsoft.Live.Controls;assembly=Microsoft.Live.Controls">
+     shell:SystemTray.IsVisible="True">
 
     <!--LayoutRoot is the root grid where all page content is placed-->
-    <Grid x:Name="LayoutRoot" Background="Transparent">
-        <my:SignInButton Name="btnSignin" ClientId="00000000440FDE10" Scopes="wl.signin wl.basic" Branding="MicrosoftAccount"  
-	TextType="SignIn" SessionChanged="btnSignin_SessionChanged" HorizontalAlignment="Right"  VerticalAlignment="Top" />
-        <TextBlock Height="32" HorizontalAlignment="Right" Margin="12,78,0,0" Name="infoTextBlock" Text="" VerticalAlignment="Bottom" Width="419" />
+	<Grid x:Name="LayoutRoot" Background="Transparent">
+		<my:SignInButton x:Name="btnSignin" ClientId="00000000440FDE10" Scopes="wl.signin wl.basic" Branding="MicrosoftAccount"  
+			TextType="SignIn" SessionChanged="btnSignin_SessionChanged" HorizontalAlignment="Right"  VerticalAlignment="Top" />
+		<TextBlock Height="32" HorizontalAlignment="Right" Margin="12,78,0,0" x:Name="infoTextBlock" Text="" VerticalAlignment="Bottom" Width="419" />
 
-        <!--TitlePanel contains the name of the application and page title-->
-        <StackPanel Grid.Row="0" Margin="7,17,5,28">
-            <TextBlock Text="DELIVERY JOURNAL" Style="{StaticResource PhoneTextNormalStyle}"/>
-            <TextBlock Text="Settings" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
-        </StackPanel>
+		<!--TitlePanel contains the name of the application and page title-->
+		<StackPanel Grid.Row="0" Margin="7,17,5,28">
+			<TextBlock Text="DELIVERY JOURNAL" Style="{StaticResource PhoneTextNormalStyle}"/>
+			<TextBlock Text="Settings" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
+		</StackPanel>
 
         <!--ContentPanel - place additional content here-->
-            <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            <CheckBox Name="CheckBox_LocationService" Content="Enable Location Service" HorizontalAlignment="Right" Margin="0,191,123,0" VerticalAlignment="Top" Height="79" Checked="CheckBox_LocationService_Checked" Unchecked="CheckBox_LocationService_Unchecked"/>
-            <CheckBox x:Name="CheckBox_UserIdleDetectionDisabled" Content="Disable User Idle Detection" HorizontalAlignment="Left" Margin="29,249,0,0" VerticalAlignment="Top" Checked="CheckBox_UserIdleDetectionDisabled_Checked" Unchecked="CheckBox_UserIdleDetectionDisabled_Unchecked"/>
-            <CheckBox x:Name="CheckBox_AppIdleDetectionDisabled" Content="Disable Application Idle Detection" HorizontalAlignment="Left" Margin="29,305,0,0" VerticalAlignment="Top" Checked="CheckBox_AppIdleDetectionDisabled_Checked" Unchecked="CheckBox_AppIdleDetectionDisabled_Unchecked"/>
-            <TextBlock x:Name="TextBlock_Session_Expires" HorizontalAlignment="Left" Margin="45,440,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="30" Width="274"/>
-            <TextBlock x:Name="SessionExpiresLabel" HorizontalAlignment="Left" Margin="45,407,0,0" TextWrapping="Wrap" Text="Session Expires:" VerticalAlignment="Top" Height="46" Width="323"/>
-        </Grid>
-    </Grid>
+		<Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
+			<i:Interaction.Triggers>
+				<i:EventTrigger EventName="MouseLeftButtonDown">
+					<ec:NavigateToPageAction TargetPage="/MainPage.xaml"/>
+				</i:EventTrigger>
+			</i:Interaction.Triggers>
+			<CheckBox x:Name="CheckBox_LocationService" Content="Enable Location Service" HorizontalAlignment="Right" Margin="0,191,123,0" VerticalAlignment="Top" Height="79"/>
+			<CheckBox x:Name="CheckBox_UserIdleDetectionDisabled" Content="Disable User Idle Detection" HorizontalAlignment="Left" Margin="29,249,0,0" VerticalAlignment="Top"/>
+			<CheckBox x:Name="CheckBox_AppIdleDetectionDisabled" Content="Disable Application Idle Detection" HorizontalAlignment="Left" Margin="29,305,0,0" VerticalAlignment="Top"/>
+			<TextBlock x:Name="TextBlock_Session_Expires" HorizontalAlignment="Left" Margin="45,440,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="30" Width="274"/>
+			<TextBlock x:Name="SessionExpiresLabel" HorizontalAlignment="Left" Margin="45,407,0,0" TextWrapping="Wrap" Text="Session Expires:" VerticalAlignment="Top" Height="46" Width="323"/>
+			<Button Content="Go to&#xD;&#xA;Main" HorizontalAlignment="Left" Height="110" Margin="293,615,0,0" VerticalAlignment="Top" Width="130">
+				<i:Interaction.Triggers>
+					<i:EventTrigger EventName="Click">
+						<ec:NavigateToPageAction TargetPage="/MainPage.xaml"/>
+					</i:EventTrigger>
+				</i:Interaction.Triggers>
+			</Button>
+		</Grid>
+	</Grid>
 
 </phone:PhoneApplicationPage>
