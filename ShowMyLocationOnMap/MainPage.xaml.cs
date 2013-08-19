@@ -1,66 +1,50 @@
-﻿using System;
-using System.Windows;
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Maps.Controls;
-using System.Device.Location; // Provides the GeoCoordinate class.
-using Windows.Devices.Geolocation; //Provides the Geocoordinate class.
-using System.Windows.Media;
-using System.Windows.Shapes;
-using System.IO.IsolatedStorage;
-using Microsoft.Phone.Tasks;
-using Microsoft.WindowsAzure.MobileServices;
-using Newtonsoft.Json;
-
-namespace ShowMyLocationOnMap
+﻿namespace ShowMyLocationOnMap
 {
-    public partial class MainPage : PhoneApplicationPage
+    using System;
+    using System.Windows;
+    using Microsoft.Phone.Controls;
+    using Microsoft.Phone.Maps.Controls;
+    using System.Device.Location; // Provides the GeoCoordinate class.
+    using Windows.Devices.Geolocation; //Provides the Geocoordinate class.
+    using System.Windows.Media;
+    using System.Windows.Shapes;
+    using System.IO.IsolatedStorage;
+    using Microsoft.Phone.Tasks;
+    using Microsoft.WindowsAzure.MobileServices;
+    using Newtonsoft.Json;
+    using ShowMyLocationOnMap.DataModel;
+    using System.Threading.Tasks;
+    using Microsoft.Phone.Maps.Toolkit;
+    using System.Collections.ObjectModel;
+    using System.Linq;
+
+    public sealed partial class MainPage : PhoneApplicationPage
     {
-
-        private MobileServiceCollection<DeliveryRoute, DeliveryRoute> deliveries;
-        private IMobileServiceTable<DeliveryRoute> deliveryTable = App.MobileService.GetTable<DeliveryRoute>();
-
-        public class DeliveryRoute
-        {
-            public int Id { get; set; }
-
-            [JsonProperty(PropertyName = "destinationPoints")]
-            public DoubleCollection[] DestinationPoints { get; set; }
-
-            [JsonProperty(PropertyName = "driver")]
-            public int Driver { get; set; }
-        }
-
-        public class Driver
-        {
-            public int Id { get; set; }
-
-            [JsonProperty(PropertyName = "firstName")]
-            public string FirstName { get; set; }
-
-            [JsonProperty(PropertyName = "lastName")]
-            public string LastName { get; set; }
-        }
-
         Geolocator geolocator = null;
+        GeoCoordinate myGeoCoordinate;
         bool tracking = false;
+
+        public class Location
+        {
+            public String Latitude { get; set; }
+            public String Longitude { get; set; }
+        }
 
         // Constructor
         public MainPage()
         {
             InitializeComponent();
             this.Loaded += MainPage_Loaded;
-            ShowMyLocationOnTheMap();
         }
 
-        private async void ShowMyLocationOnTheMap()
+        private async Task GetMyLocation()
         {
             // Get my current location.
             Geolocator myGeolocator = new Geolocator();
             Geoposition myGeoposition = await myGeolocator.GetGeopositionAsync();
-            Geocoordinate myGeocoordinate = myGeoposition.Coordinate;
-            GeoCoordinate myGeoCoordinate = 
-            CoordinateConverter.ConvertGeocoordinate(myGeocoordinate);
-
+            Geocoordinate geocoordinate = myGeoposition.Coordinate;
+            GeoCoordinate myGeoCoordinate =
+            CoordinateConverter.ConvertGeocoordinate(geocoordinate);
             // Make my current location the center of the Map.
             this.mapWithMyLocation.Center = myGeoCoordinate;
             this.mapWithMyLocation.ZoomLevel = 13;
@@ -86,6 +70,12 @@ namespace ShowMyLocationOnMap
             mapWithMyLocation.Layers.Add(myLocationLayer);
         }
 
+        private void Pushpin_OnTap(object sender, GestureEventArgs e)
+        {
+            Pushpin pushpin = sender as Pushpin;
+            MessageBox.Show(pushpin.Content.ToString());
+        }
+
         private void Route_Click(object sender, RoutedEventArgs e)
         {
             string endLocation = End.Text;
@@ -95,7 +85,7 @@ namespace ShowMyLocationOnMap
             LabeledMapLocation endLocationLML = new LabeledMapLocation(endLocation, null);
             // If mapsDirectionsTask.Start is not set, the user's current location // is used as start point. 
             mapsDirectionsTask.End = endLocationLML;
-            mapsDirectionsTask.Show(); 
+            mapsDirectionsTask.Show();
         }
 
         void geolocator_StatusChanged(Geolocator sender, StatusChangedEventArgs args)
@@ -177,8 +167,17 @@ namespace ShowMyLocationOnMap
             }
         }
 
-        void MainPage_Loaded(object sender, RoutedEventArgs e)
+        async void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
+            await GetMyLocation();
+            ObservableCollection<DependencyObject> children = MapExtensions.GetChildren(mapWithMyLocation);
+            var obj = children.FirstOrDefault(x => x.GetType() == typeof(MapItemsControl)) as MapItemsControl;
+            UserLocationMarker marker = (UserLocationMarker)this.FindName("UserLocationMarker");
+            marker.GeoCoordinate = myGeoCoordinate;
+
+            Pushpin pushpin = (Pushpin)this.FindName("MyPushpin");
+            pushpin.GeoCoordinate = new GeoCoordinate(30.712474, -132.32691);
+
         }
     }
 }

@@ -11,6 +11,7 @@ namespace ShowMyLocationOnMap
     {
         public enum SETTINGS_OPTIONS
         {
+            UserName,
             SessionExpires,
             LiveConnectToken,
             AuthType,
@@ -23,6 +24,9 @@ namespace ShowMyLocationOnMap
         // set the default settings
         // the IsolatedStorageProperty will set properties if they do not exist
         /// </summary>
+
+        public static readonly IsolatedStorageProperty<String> UserName =
+            new IsolatedStorageProperty<String>(SETTINGS_OPTIONS.UserName.ToString(), String.Empty);
         public static readonly IsolatedStorageProperty<DateTime> SessionExpires =
             new IsolatedStorageProperty<DateTime>(SETTINGS_OPTIONS.SessionExpires.ToString(), DateTime.Now);
         public static readonly IsolatedStorageProperty<bool> LocationConsent =

@@ -43,6 +43,16 @@ namespace ShowMyLocationOnMap
                 myDataProperty = "Last bound time was " + dateTime.ToLongTimeString();
             }
 
+            public String UserName
+            {
+                get { return SettingsContainer.UserName.Value; }
+                set
+                {
+                    SettingsContainer.UserName.Value = value;
+                    OnPropertyChanged("UserName");
+                }
+            }
+
             public DateTime SessionExpires
             {
                 get { return SettingsContainer.SessionExpires.Value; }
@@ -131,7 +141,7 @@ namespace ShowMyLocationOnMap
                 msgText.Append("Idle detection will ensure that the screen does not turn off while navigating. ");
                 msgText.Append("Detection will be disabled only while this app is running, but you can manually enable ");
                 msgText.Append("it from the Settings page.");
-                MessageBoxResult result = MessageBox.Show(msgText.ToString(), "UserIdleDetectionMode", MessageBoxButton.OKCancel);
+                MessageBoxResult result = MessageBox.Show(msgText.ToString(), "Disable User Idle Detection", MessageBoxButton.OKCancel);
                 if (result == MessageBoxResult.OK)
                 {
                     consent = true;
@@ -157,7 +167,7 @@ namespace ShowMyLocationOnMap
                 msgText.Append("It is recommended that you also disable Application Idle detection. If this is not done, the application ");
                 msgText.Append("will not run when the lock screen is engaged. When this is disabled, it will remain disabled until ");
                 msgText.Append("your current session ends. Would you like to disable application idle detection now?");
-                MessageBox.Show(msgText.ToString(), "ApplicationIdleDetectionMode", MessageBoxButton.OK);
+                MessageBox.Show(msgText.ToString(), "Disable Application Idle Detection", MessageBoxButton.OK);
                 PhoneApplicationService.Current.ApplicationIdleDetectionMode = IdleDetectionMode.Disabled;
                 settings.AppIdleDetectionDisabled = true;
             }
@@ -292,6 +302,7 @@ namespace ShowMyLocationOnMap
                                 dynamic result = operationResult.Result;
                                 if (result != null)
                                 {
+                                    settings.UserName = result.name;
                                     this.infoTextBlock.Text = string.Join(" ", "Hello", result.name, "!");
                                 }
                                 else
