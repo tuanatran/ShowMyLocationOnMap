@@ -7,18 +7,20 @@
     <Node Id="Microsoft.Bcl.Build 1.0.9-beta" Label="Microsoft.Bcl.Build 1.0.9-beta" Category="Package" />
     <Node Id="Microsoft.Net.Http 2.2.13" Label="Microsoft.Net.Http 2.2.13" Category="Package" />
     <Node Id="Newtonsoft.Json 5.0.6" Label="Newtonsoft.Json 5.0.6" Category="Package" />
-    <Node Id="WindowsAzure.MobileServices 1.0.1" Label="WindowsAzure.MobileServices 1.0.1" Category="Package" />
+    <Node Id="WindowsAzure.MobileServices 1.0.2" Label="WindowsAzure.MobileServices 1.0.2" Category="Package" />
+    <Node Id="WPtoolkit 4.2013.08.16" Label="WPtoolkit 4.2013.08.16" Category="Package" />
   </Nodes>
   <Links>
     <Link Source="Microsoft.Bcl 1.1.3" Target="Microsoft.Bcl.Build 1.0.9-beta" Category="Package Dependency" />
     <Link Source="Microsoft.Bcl.Async 1.0.16" Target="Microsoft.Bcl 1.1.3" Category="Package Dependency" />
     <Link Source="Microsoft.Net.Http 2.2.13" Target="Microsoft.Bcl 1.1.3" Category="Package Dependency" />
     <Link Source="Microsoft.Net.Http 2.2.13" Target="Microsoft.Bcl.Build 1.0.9-beta" Category="Package Dependency" />
-    <Link Source="WindowsAzure.MobileServices 1.0.1" Target="Newtonsoft.Json 5.0.6" Category="Package Dependency" />
-    <Link Source="WindowsAzure.MobileServices 1.0.1" Target="Microsoft.Bcl.Async 1.0.16" Category="Package Dependency" />
-    <Link Source="WindowsAzure.MobileServices 1.0.1" Target="Microsoft.Bcl 1.1.3" Category="Package Dependency" />
-    <Link Source="WindowsAzure.MobileServices 1.0.1" Target="Microsoft.Net.Http 2.2.13" Category="Package Dependency" />
-    <Link Source="ShowMyLocationOnMap" Target="WindowsAzure.MobileServices 1.0.1" Category="Installed Package" />
+    <Link Source="WindowsAzure.MobileServices 1.0.2" Target="Newtonsoft.Json 5.0.6" Category="Package Dependency" />
+    <Link Source="WindowsAzure.MobileServices 1.0.2" Target="Microsoft.Bcl.Async 1.0.16" Category="Package Dependency" />
+    <Link Source="WindowsAzure.MobileServices 1.0.2" Target="Microsoft.Bcl 1.1.3" Category="Package Dependency" />
+    <Link Source="WindowsAzure.MobileServices 1.0.2" Target="Microsoft.Net.Http 2.2.13" Category="Package Dependency" />
+    <Link Source="ShowMyLocationOnMap" Target="WindowsAzure.MobileServices 1.0.2" Category="Installed Package" />
+    <Link Source="ShowMyLocationOnMap" Target="WPtoolkit 4.2013.08.16" Category="Installed Package" />
   </Links>
   <Categories>
     <Category Id="Project" />

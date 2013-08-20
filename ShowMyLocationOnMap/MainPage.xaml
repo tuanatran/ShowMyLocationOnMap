@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:maps="clr-namespace:Microsoft.Phone.Maps.Controls;assembly=Microsoft.Phone.Maps"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Maps.Toolkit;assembly=Microsoft.Phone.Controls.Toolkit"
     x:Class="ShowMyLocationOnMap.MainPage"
     mc:Ignorable="d"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
@@ -58,9 +59,19 @@
                 <RowDefinition Height="187*"/>
                 <RowDefinition Height="28*"/>
             </Grid.RowDefinitions>
-
-            <maps:Map x:Name="mapWithMyLocation" Margin="-15,3,-8,3" Grid.RowSpan="2"/>
-
+            <maps:Map x:Name="mapWithMyLocation" Margin="-15,3,-8,3" Grid.RowSpan="2">
+                <toolkit:MapExtensions.Children>
+                    <toolkit:MapItemsControl Name="MapLocations">
+                        <toolkit:MapItemsControl.ItemTemplate>
+                            <DataTemplate>                     
+                                <toolkit:Pushpin GeoCoordinate="{Binding Coordinate}" Content="{Binding Name}"/>
+                            </DataTemplate>
+                        </toolkit:MapItemsControl.ItemTemplate>
+                        <toolkit:UserLocationMarker x:Name="UserLocationMarker"/>
+                        <toolkit:Pushpin x:Name="MyPushpin" Content="My Position"/>
+                    </toolkit:MapItemsControl>
+                </toolkit:MapExtensions.Children>
+            </maps:Map>      
         </Grid>
         <TextBox x:Name="End" HorizontalAlignment="Left" Height="67" Margin="-8,82,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="352" FontSize="22" Grid.RowSpan="2"/>
         <Button x:Name="Go" Content="Get Route" HorizontalAlignment="Left" Margin="325,83,0,0" VerticalAlignment="Top" Width="150" Click="Route_Click" Height="66" FontSize="22" Grid.RowSpan="2"/>

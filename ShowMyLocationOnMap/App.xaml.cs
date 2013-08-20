@@ -9,6 +9,7 @@ using Microsoft.Phone.Shell;
 using ShowMyLocationOnMap.Resources;
 using Microsoft.WindowsAzure.MobileServices;
 using Microsoft.Live;
+using Microsoft.Phone.Notification;
 
 namespace ShowMyLocationOnMap
 {
@@ -29,6 +30,25 @@ namespace ShowMyLocationOnMap
         private const string APP_AUTHKEY_LIVECONNECT = "00000000440FDE10";
         private const string APPLICATION_URL = "https://routewatch.azure-mobile.net/";
         private const string APPLICATION_KEY = "LgBaABUxSgYxejSarTfjPzrnuSOxPt29";
+
+        public static HttpNotificationChannel CurrentChannel { get; private set; }
+
+        private void AcquirePushChannel()
+        {
+            CurrentChannel = HttpNotificationChannel.Find("MyPushChannel");
+
+            if (CurrentChannel == null)
+            {
+                CurrentChannel = new HttpNotificationChannel("MyPushChannel");
+                CurrentChannel.Open();
+                CurrentChannel.BindToShellTile();
+            }
+
+            IMobileServiceTable<Channel> channelTable = App.MobileService.GetTable<Channel>();
+            var channel = new Channel { Uri = CurrentChannel.ChannelUri.ToString() };
+            channelTable.InsertAsync(channel);
+        }
+        
 
         /// <summary>
         /// Constructor for the Application object.

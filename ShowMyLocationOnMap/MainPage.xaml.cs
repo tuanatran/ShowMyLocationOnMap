@@ -9,47 +9,25 @@ using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 using ShowMyLocationOnMap.Resources;
 using Microsoft.Phone.Maps.Controls;
+using Microsoft.Phone.Maps.Toolkit;
 using System.Device.Location; // Provides the GeoCoordinate class.
 using Windows.Devices.Geolocation; //Provides the Geocoordinate class.
-using System.Windows.Media;
 using System.Windows.Shapes;
 using System.IO.IsolatedStorage;
 using Microsoft.Phone.Tasks;
 using Microsoft.WindowsAzure.MobileServices;
-using Newtonsoft.Json;
-
-
-
+using ShowMyLocationOnMap.DataModel;
+using System.Threading.Tasks;
+using System.Windows.Media;
+using System.Collections.ObjectModel;
 
 namespace ShowMyLocationOnMap
 {
     public partial class MainPage : PhoneApplicationPage
     {
-
         private MobileServiceCollection<DeliveryRoute, DeliveryRoute> deliveries;
         private IMobileServiceTable<DeliveryRoute> deliveryTable = App.MobileService.GetTable<DeliveryRoute>();
-
-        public class DeliveryRoute
-        {
-            public int Id { get; set; }
-
-            [JsonProperty(PropertyName = "destinationPoints")]
-            public DoubleCollection[] DestinationPoints { get; set; }
-
-            [JsonProperty(PropertyName = "driver")]
-            public int Driver { get; set; }
-        }
-
-        public class Driver
-        {
-            public int Id { get; set; }
-
-            [JsonProperty(PropertyName = "firstName")]
-            public string FirstName { get; set; }
-
-            [JsonProperty(PropertyName = "lastName")]
-            public string LastName { get; set; }
-        }
+        private Queue<Position> routeQueue = new Queue<Position>();
 
         Geolocator geolocator = null;
         bool tracking = false;
@@ -59,63 +37,31 @@ namespace ShowMyLocationOnMap
 
         ToggleStatus locationToggleStatus = ToggleStatus.ToggledOff;
         ToggleStatus landmarksToggleStatus = ToggleStatus.ToggledOff;
-        GeoCoordinate currentLocation = null;
-        MapLayer locationLayer = null;
+        GeoCoordinate currentLocation;
+
+        MapLayer locationLayer;
 
         // Constructor
         public MainPage()
         {
             InitializeComponent();
-            //this.Loaded += MainPage_Loaded;
-            //ShowMyLocationOnTheMap();
-
-            // Create the localized ApplicationBar.
+            Loaded += MainPage_Loaded;
             BuildLocalizedApplicationBar();
-            //ShowMyLocationOnTheMap();
-
-            // Get current location.
-            GetLocation();
         }
 
-       
-
-        private async void ShowMyLocationOnTheMap()
+        private async void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-            // Get my current location.
-            Geolocator myGeolocator = new Geolocator();
-            Geoposition myGeoposition = await myGeolocator.GetGeopositionAsync();
-            Geocoordinate myGeocoordinate = myGeoposition.Coordinate;
-            GeoCoordinate myGeoCoordinate = 
-            CoordinateConverter.ConvertGeocoordinate(myGeocoordinate);
-
-            // Make my current location the center of the Map.
-            this.mapWithMyLocation.Center = myGeoCoordinate;
-            this.mapWithMyLocation.ZoomLevel = 13;
-
-            // Create a small circle to mark the current location.
-            Ellipse myCircle = new Ellipse();
-            myCircle.Fill = new SolidColorBrush(Colors.Blue);
-            myCircle.Height = 20;
-            myCircle.Width = 20;
-            myCircle.Opacity = 50;
-
-            // Create a MapOverlay to contain the circle.
-            MapOverlay myLocationOverlay = new MapOverlay();
-            myLocationOverlay.Content = myCircle;
-            myLocationOverlay.PositionOrigin = new Point(0.5, 0.5);
-            myLocationOverlay.GeoCoordinate = myGeoCoordinate;
-
-            // Create a MapLayer to contain the MapOverlay.
-            MapLayer myLocationLayer = new MapLayer();
-            myLocationLayer.Add(myLocationOverlay);
-
-            // Add the MapLayer to the Map.
-            mapWithMyLocation.Layers.Add(myLocationLayer);
+            currentLocation = await GetLocation();
+            ObservableCollection<DependencyObject> children = MapExtensions.GetChildren(mapWithMyLocation);
+            var obj = children.FirstOrDefault(x => x.GetType() == typeof(MapItemsControl)) as MapItemsControl;
         }
-        
 
-       
-
+        private void MyPushpin_OnTap(object sender, GestureEventArgs e)
+        {
+            Pushpin pushpin = sender as Pushpin;
+            MessageBox.Show(pushpin.Content.ToString());
+        }
+ 
         private void Route_Click(object sender, RoutedEventArgs e)
         {
             string endLocation = End.Text;
@@ -207,9 +153,36 @@ namespace ShowMyLocationOnMap
             }
         }
 
-        void MainPage_Loaded(object sender, RoutedEventArgs e)
-        {
-        }
+        //private async void OnAddClick(object sender, RoutedEventArgs e)
+        //{
+        //    this.TitleText.IsEnabled = false;
+        //    this.DescriptionText.IsEnabled = false;
+        //    this.AddButton.IsEnabled = false;
+
+        //    // Insert the place into a Windows Azure Mobile Services table
+        //    await this.InsertPlace();
+
+        //    this.TitleText.IsEnabled = true;
+        //    this.DescriptionText.IsEnabled = true;
+        //    this.AddButton.IsEnabled = true;
+        //    this.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+        //    if (this.PlaceInserted != null)
+        //    {
+        //        this.PlaceInserted(this, null);
+        //    }
+        //}
+
+        //private async Task InsertDeliveryPoint()
+        //{
+        //    var place = new DeliveryRoute()
+        //    {
+        //        Title = this.title.Text,
+        //        Latitude = this.latitude,
+        //        Longitude = this.longitude
+        //    };
+
+        //    await App.MobileService.GetTable<DeliveryRoute>().InsertAsync(place);
+        //}
 
         #region Event handlers for App Bar buttons and menu items
 
@@ -272,7 +245,11 @@ namespace ShowMyLocationOnMap
 
         private void ShowLocation()
         {
-            // Cr*eate a small circle to mark the current location.
+            // Make my current location the center of the Map.
+            mapWithMyLocation.Center = currentLocation;
+            mapWithMyLocation.ZoomLevel = 13;
+
+            // Create a small circle to mark the current location.
             Ellipse myCircle = new Ellipse();
             myCircle.Fill = new SolidColorBrush(Colors.Blue);
             myCircle.Height = 20;
@@ -290,22 +267,22 @@ namespace ShowMyLocationOnMap
             locationLayer.Add(myLocationOverlay);
 
             // Add the MapLayer to the Map.
-            this.mapWithMyLocation.Layers.Add(locationLayer);
-
+            mapWithMyLocation.Layers.Add(locationLayer);
         }
 
-        private async void GetLocation()
+        private async Task<GeoCoordinate> GetLocation()
         {
             // Get current location.
-            Geolocator myGeolocator = new Geolocator();
-            Geoposition myGeoposition = await myGeolocator.GetGeopositionAsync();
-            Geocoordinate myGeocoordinate = myGeoposition.Coordinate;
-            currentLocation = CoordinateConverter.ConvertGeocoordinate(myGeocoordinate);
+            Geolocator geolocator = new Geolocator();
+            Geoposition geoposition = await geolocator.GetGeopositionAsync();
+            Geocoordinate geocoordinate = geoposition.Coordinate;
+            GeoCoordinate geoCoordinate = CoordinateConverter.ConvertGeocoordinate(geocoordinate);
+            return geoCoordinate;
         }
 
         private void CenterMapOnLocation()
         {
-            this.mapWithMyLocation.Center = currentLocation;
+            mapWithMyLocation.Center = currentLocation;
         }
 
         #endregion

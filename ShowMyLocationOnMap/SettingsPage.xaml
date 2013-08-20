@@ -38,10 +38,10 @@
 			<CheckBox x:Name="CheckBox_AppIdleDetectionDisabled" Content="Disable Application Idle Detection" HorizontalAlignment="Left" Margin="29,305,0,0" VerticalAlignment="Top"/>
 			<TextBlock x:Name="TextBlock_Session_Expires" HorizontalAlignment="Left" Margin="45,440,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="30" Width="274"/>
 			<TextBlock x:Name="SessionExpiresLabel" HorizontalAlignment="Left" Margin="45,407,0,0" TextWrapping="Wrap" Text="Session Expires:" VerticalAlignment="Top" Height="46" Width="323"/>
-			<Button Content="Go to&#xD;&#xA;Main" HorizontalAlignment="Left" Height="110" Margin="293,615,0,0" VerticalAlignment="Top" Width="130">
+			<Button Content="To Do" HorizontalAlignment="Left" Height="110" Margin="293,615,0,0" VerticalAlignment="Top" Width="130">
 				<i:Interaction.Triggers>
 					<i:EventTrigger EventName="Click">
-						<ec:NavigateToPageAction TargetPage="/MainPage.xaml"/>
+						<ec:NavigateToPageAction TargetPage="/TodoPage.xaml"/>
 					</i:EventTrigger>
 				</i:Interaction.Triggers>
 			</Button>
